@@ -420,7 +420,7 @@ body.mode-display {
   border: 1px solid var(--card-border);
   border-radius: 16px 16px 0 0;
   border-bottom: none;
-  padding: 1.4vh 0;
+  padding: 1.8vh 0;
   overflow: hidden;
   white-space: nowrap;
   margin-top: auto;
@@ -432,7 +432,8 @@ body.mode-display {
 
 .ticker {
   display: inline-block;
-  font-size: clamp(12px, 1.9vmin, 20px);
+  font-size: clamp(16px, 2.8vmin, 30px);
+  font-weight: 600;
   color: var(--text);
   padding-left: 100%;
   animation: scroll-left 32s linear infinite;
