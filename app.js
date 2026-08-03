@@ -240,12 +240,15 @@ function loadConfig() {
 
 let clockTimer = null;
 let verseTimer = null;
+let tickerTimer = null;
 
 function stopClocks() {
   if (clockTimer) clearInterval(clockTimer);
   if (verseTimer) clearInterval(verseTimer);
+  if (tickerTimer) clearInterval(tickerTimer);
   clockTimer = null;
   verseTimer = null;
+  tickerTimer = null;
 }
 
 function timesForDate(config, date) {
@@ -280,13 +283,16 @@ function startDisplay(config) {
   const lang = config.language || 'en';
   document.getElementById('verseLabelOut').textContent = t(lang, 'ayahOfDay');
 
+  // Build the rotating ticker messages — one full sentence shown at a time
+  // (fades in, holds, fades out, then the next one appears) rather than a
+  // single long line scrolling continuously, so each message is easy to
+  // read in one glance. The Hidaya AI branding line always plays last.
   const tickerParts = [];
-  if (config.announcement) tickerParts.push(`📢 ${config.announcement}`);
-  if (config.swish) tickerParts.push(`💚 ${t(lang, 'support')} ${config.mosqueName || ''} — Swish: ${config.swish}`);
-  if (config.account) tickerParts.push(`🏦 ${t(lang, 'bankAccount')}: ${config.account}`);
-  document.getElementById('tickerOut').textContent = tickerParts.length
-      ? tickerParts.join('     •     ')
-      : `🕌 ${config.mosqueName || 'Hidaya AI'} — ${t(lang, 'poweredBy')}`;
+  if (config.announcement) tickerParts.push(config.announcement);
+  if (config.swish) tickerParts.push(`${t(lang, 'support')} ${config.mosqueName || ''} — Swish: ${config.swish}`);
+  if (config.account) tickerParts.push(`${t(lang, 'bankAccount')}: ${config.account}`);
+  tickerParts.push(`BRAND:${t(lang, 'poweredBy')}`);
+  startTicker(tickerParts);
 
   renderPrayerRow(config);
   tickClock(config);
@@ -298,6 +304,34 @@ function startDisplay(config) {
     verseIndex = (verseIndex + 1) % DISPLAY_VERSES.length;
     showVerse(verseIndex);
   }, 25000);
+}
+
+// Shows the ticker messages one at a time — fades in, holds for a few
+// seconds, fades out, then the next message takes its place — instead of
+// one long line scrolling continuously, so each sentence is easy to read
+// at a glance from across the room.
+function startTicker(messages) {
+  const tickerEl = document.getElementById('tickerOut');
+  let index = 0;
+  const HOLD_MS = 6000;
+  const FADE_MS = 500;
+
+  function showNext() {
+    tickerEl.style.opacity = 0;
+    setTimeout(() => {
+      const msg = messages[index];
+      if (msg.startsWith('BRAND:')) {
+        tickerEl.innerHTML = `<span class="brand-line">${msg.slice(6)} <span class="brand-logo-text"><span class="brand-hidaya">HIDAYA</span> <span class="brand-ai">AI</span></span></span>`;
+      } else {
+        tickerEl.textContent = msg;
+      }
+      tickerEl.style.opacity = 1;
+      index = (index + 1) % messages.length;
+    }, FADE_MS);
+  }
+
+  showNext();
+  tickerTimer = setInterval(showNext, HOLD_MS);
 }
 
 function showVerse(index) {
