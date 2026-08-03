@@ -361,6 +361,17 @@ body.mode-display {
   font-size: clamp(13px, 2vmin, 20px);
 }
 
+/* Line-icon sizing — icons inherit color from their parent's `color`, so
+   passed/current-row styling above still applies automatically. */
+.row-icon svg,
+.next-icon svg,
+.row-check svg {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.15em;
+}
+
 /* Ayah of the Day card */
 
 .verse-card {

@@ -6,7 +6,18 @@
 const STORAGE_KEY = 'hidaya_display_config_v1';
 const PRAYER_ORDER = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const COUNTDOWN_PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-const PRAYER_ICONS = { Fajr: '🌅', Sunrise: '🌄', Dhuhr: '☀️', Asr: '⛅', Maghrib: '🌇', Isha: '🌙' };
+
+// Clean line-style icons (matching the phone app's Material-style icon set)
+// instead of colorful emoji — single-color, inherits currentColor so they
+// pick up the muted/highlighted text color automatically per row.
+const SVG_TWILIGHT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v3"/><path d="M5.6 8.6l1.4 1.4"/><path d="M18.4 8.6l-1.4 1.4"/><path d="M3 13h1"/><path d="M20 13h1"/><path d="M6 13a6 6 0 0 1 12 0"/><path d="M3 17h18"/><path d="M8 21l-2-2"/><path d="M16 21l2-2"/></svg>';
+const SVG_SUNRISE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="4"/><path d="M12 2v4"/><path d="M9 5l3-3 3 3"/><path d="M3 21h18"/></svg>';
+const SVG_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v3"/><path d="M12 19v3"/><path d="M4.2 4.2l2.1 2.1"/><path d="M17.7 17.7l2.1 2.1"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="M4.2 19.8l2.1-2.1"/><path d="M17.7 6.3l2.1-2.1"/></svg>';
+const SVG_CLOUD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 19a4 4 0 1 1 .9-7.9 5 5 0 0 1 9.5 1.9A3.6 3.6 0 0 1 16.5 19H6.5Z"/></svg>';
+const SVG_MOON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg>';
+const SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.3 2.3 4.7-5.1"/></svg>';
+
+const PRAYER_ICONS = { Fajr: SVG_TWILIGHT, Sunrise: SVG_SUNRISE, Dhuhr: SVG_SUN, Asr: SVG_CLOUD, Maghrib: SVG_TWILIGHT, Isha: SVG_MOON };
 
 const setupView = document.getElementById('setupView');
 const displayView = document.getElementById('displayView');
@@ -258,7 +269,7 @@ function renderPrayerRow(config) {
     row.id = `lrow-${name}`;
     row.innerHTML = `
       <div class="row-left"><span class="row-icon">${PRAYER_ICONS[name] || ''}</span><span>${name}</span></div>
-      <div class="row-time">${passed ? '<span class="row-check">✓</span>' : ''}${time}</div>
+      <div class="row-time">${passed ? `<span class="row-check">${SVG_CHECK}</span>` : ''}${time}</div>
     `;
     listCard.appendChild(row);
   }
