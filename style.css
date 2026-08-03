@@ -1,0 +1,352 @@
+/* Colors match the phone app's "Ocean Teal" theme exactly
+   (app_settings.dart _themes['teal']) so the display and the app feel
+   like the same product. */
+:root {
+  --bg-top: #00494f;      /* teal.primary */
+  --bg-bottom: #00838f;   /* teal.bg */
+  --card-bg: rgba(0, 172, 193, 0.16);        /* teal.primaryEnd, translucent */
+  --card-bg-strong: rgba(0, 172, 193, 0.26);
+  --card-border: rgba(38, 180, 196, 0.4);    /* teal.border */
+  --accent: #b2ebf2;      /* teal.accent */
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.75);
+  --text-dim: rgba(255, 255, 255, 0.5);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+  color: var(--text);
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* ── Setup view ────────────────────────────────────────────────────── */
+
+.setup-view {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.setup-card {
+  background: var(--card-bg-strong);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 32px 36px;
+  max-width: 480px;
+  width: 100%;
+  backdrop-filter: blur(6px);
+}
+
+.setup-card h1 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  color: var(--accent);
+}
+
+.setup-sub {
+  margin: 0 0 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  margin: 18px 0 4px;
+  color: var(--text);
+}
+
+.field-hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.setup-card input[type="text"],
+.setup-card input[type="file"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.file-status {
+  margin-top: 8px;
+  font-size: 13px;
+  min-height: 18px;
+}
+.file-status.ok { color: var(--accent); }
+.file-status.err { color: #fca5a5; }
+
+.start-btn {
+  margin-top: 26px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #06201c;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.start-btn:disabled {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.35);
+  cursor: not-allowed;
+}
+
+.setup-error {
+  color: #fca5a5;
+  font-size: 13px;
+  min-height: 16px;
+  margin-top: 10px;
+}
+
+/* ── Display view — mirrors the phone app's home-screen card layout ─── */
+
+.display-view {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3vh 3vw 0;
+  position: relative;
+}
+
+.settings-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.18);
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 10;
+}
+.settings-btn:hover { color: rgba(255, 255, 255, 0.6); }
+
+.content-col {
+  width: 100%;
+  max-width: 640px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Top bar: mosque name + Hijri date (left) / big animated clock + Gregorian date (right) */
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 1.6vh;
+}
+
+.mosque-block .mosque-name {
+  font-size: 1.7vw;
+  min-font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mosque-block .hijri-line {
+  color: var(--text-muted);
+  font-size: 1vw;
+  margin-top: 2px;
+}
+
+.date-block { text-align: right; }
+
+.clock {
+  font-size: 4vw;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+
+.gregorian-line {
+  color: var(--text-muted);
+  font-size: 1vw;
+  margin-top: 2px;
+}
+
+/* Next-prayer hero card */
+
+.next-card {
+  background: var(--card-bg-strong);
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+  padding: 2.4vh 2vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.6vh;
+}
+
+.next-card .next-label {
+  color: var(--text-muted);
+  font-size: 1vw;
+  margin-bottom: 4px;
+}
+
+.next-card .next-name {
+  font-size: 2.6vw;
+  font-weight: 700;
+}
+
+.next-card .next-countdown {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 1vw;
+  font-variant-numeric: tabular-nums;
+}
+
+.next-card .next-right {
+  text-align: right;
+}
+
+.next-card .next-icon {
+  font-size: 2.4vw;
+  line-height: 1;
+}
+
+.next-card .next-time {
+  font-size: 2.4vw;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 6px;
+}
+
+/* Full prayer list card */
+
+.list-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+  padding: 0.6vh 2vw;
+  margin-bottom: 1.6vh;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5vh 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 1.3vw;
+}
+.list-row:last-child { border-bottom: none; }
+
+.list-row .row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+}
+
+.list-row .row-icon { font-size: 1.4vw; }
+
+.list-row.current .row-left,
+.list-row.current .row-time {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.list-row .row-time {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.list-row .row-check {
+  color: var(--accent);
+  font-size: 1.1vw;
+}
+
+/* Ayah of the Day card */
+
+.verse-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+  padding: 2vh 2vw;
+  margin-bottom: 1.6vh;
+  text-align: center;
+  transition: opacity 0.6s ease;
+}
+
+.verse-card .verse-label {
+  color: var(--text-muted);
+  font-size: 0.9vw;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-bottom: 10px;
+}
+
+.verse-arabic {
+  font-size: 2vw;
+  line-height: 1.8;
+  font-family: 'Traditional Arabic', 'Scheherazade New', 'Amiri', serif;
+  direction: rtl;
+}
+
+.verse-translation {
+  margin-top: 10px;
+  font-size: 1vw;
+  color: var(--text-muted);
+}
+
+/* Bottom announcement/donation ticker bar */
+
+.ticker-bar {
+  width: 100%;
+  max-width: 640px;
+  background: var(--card-bg-strong);
+  border: 1px solid var(--card-border);
+  border-radius: 16px 16px 0 0;
+  border-bottom: none;
+  padding: 1.4vh 0;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-top: auto;
+}
+
+.ticker {
+  display: inline-block;
+  font-size: 1vw;
+  color: var(--text);
+  padding-left: 100%;
+  animation: scroll-left 32s linear infinite;
+}
+
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
