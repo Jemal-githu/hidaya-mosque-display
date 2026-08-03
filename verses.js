@@ -5,23 +5,23 @@
 const DISPLAY_VERSES = [
   {
     arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
-    translation: 'Indeed, with hardship comes ease. — Ash-Sharh, 94:6',
+    translation: 'Indeed, with hardship comes ease. — Surah Ash-Sharh, 94:6',
   },
   {
     arabic: 'وَبَشِّرِ الصَّابِرِينَ',
-    translation: 'And give good news to the patient. — Al-Baqarah, 2:155',
+    translation: 'And give good news to the patient. — Surah Al-Baqarah, 2:155',
   },
   {
     arabic: 'وَقُل رَّبِّ زِدْنِي عِلْمًا',
-    translation: 'And say: My Lord, increase me in knowledge. — Ta-Ha, 20:114',
+    translation: 'And say: My Lord, increase me in knowledge. — Surah Ta-Ha, 20:114',
   },
   {
     arabic: 'إِنَّ اللَّهَ مَعَ الصَّابِرِينَ',
-    translation: 'Indeed, Allah is with the patient. — Al-Baqarah, 2:153',
+    translation: 'Indeed, Allah is with the patient. — Surah Al-Baqarah, 2:153',
   },
   {
     arabic: 'وَاذْكُر رَّبَّكَ إِذَا نَسِيتَ',
-    translation: 'And remember your Lord when you forget. — Al-Kahf, 18:24',
+    translation: 'And remember your Lord when you forget. — Surah Al-Kahf, 18:24',
   },
   {
     arabic: 'مَنْ لَا يَرْحَمِ النَّاسَ لَا يَرْحَمْهُ اللَّهُ',
@@ -37,7 +37,7 @@ const DISPLAY_VERSES = [
   },
   {
     arabic: 'وَاعْتَصِمُوا بِحَبْلِ اللَّهِ جَمِيعًا وَلَا تَفَرَّقُوا',
-    translation: 'And hold firmly to the rope of Allah all together and do not become divided. — Al-Imran, 3:103',
+    translation: 'And hold firmly to the rope of Allah all together and do not become divided. — Surah Al-Imran, 3:103',
   },
   {
     arabic: 'الْمُؤْمِنُ لِلْمُؤْمِنِ كَالْبُنْيَانِ يَشُدُّ بَعْضُهُ بَعْضًا',
