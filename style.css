@@ -127,10 +127,16 @@ body.mode-display {
   margin-top: 10px;
 }
 
-/* ── Display view — mirrors the phone app's home-screen card layout ─── */
+/* ── Display view — mirrors the phone app's home-screen card layout ───
+   Sized with clamp(min, vmin-based, max) instead of vw everywhere, so
+   text stays legible in BOTH landscape (wide, short) and portrait
+   (narrow, tall) — vw alone shrinks badly in portrait since width is
+   the small dimension there; vmin picks whichever dimension is smaller,
+   so it scales sensibly no matter which way the screen is turned. */
 
 .display-view {
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   display: flex;
   flex-direction: column;
@@ -154,11 +160,33 @@ body.mode-display {
 
 .content-col {
   width: 100%;
-  max-width: 640px;
+  max-width: 900px;
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  /* Safety net for unusually short/cramped viewports (e.g. a near-square
+     window, or a very short landscape strip) — without this, content that
+     doesn't fit visually overlaps the ticker bar below instead of just
+     scrolling. On a normal TV screen this never engages. */
+  overflow-y: auto;
+}
+
+/* On wide/landscape screens, use the extra horizontal room instead of
+   leaving it empty either side of a narrow centered column: the next-
+   prayer + full list stack on the left, the Ayah card on the right. */
+@media (orientation: landscape) and (min-width: 900px) {
+  .content-col {
+    max-width: 1500px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    grid-template-rows: auto 1fr;
+    column-gap: 2vw;
+  }
+  .top-bar { grid-column: 1 / -1; }
+  .next-card { grid-column: 1; }
+  .list-card { grid-column: 1; }
+  .verse-card { grid-column: 2; grid-row: 2; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
 }
 
 /* Top bar: mosque name + Hijri date (left) / big animated clock + Gregorian date (right) */
@@ -173,8 +201,7 @@ body.mode-display {
 }
 
 .mosque-block .mosque-name {
-  font-size: 1.7vw;
-  min-font-size: 20px;
+  font-size: clamp(18px, 3.4vmin, 34px);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -183,14 +210,14 @@ body.mode-display {
 
 .mosque-block .hijri-line {
   color: var(--text-muted);
-  font-size: 1vw;
+  font-size: clamp(12px, 1.9vmin, 20px);
   margin-top: 2px;
 }
 
 .date-block { text-align: right; }
 
 .clock {
-  font-size: 4vw;
+  font-size: clamp(28px, 6.2vmin, 64px);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: 1px;
@@ -198,7 +225,7 @@ body.mode-display {
 
 .gregorian-line {
   color: var(--text-muted);
-  font-size: 1vw;
+  font-size: clamp(12px, 1.9vmin, 20px);
   margin-top: 2px;
 }
 
@@ -208,7 +235,7 @@ body.mode-display {
   background: var(--card-bg-strong);
   border: 1px solid var(--card-border);
   border-radius: 22px;
-  padding: 2.4vh 2vw;
+  padding: 2.4vh 2.4vmin;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -217,12 +244,12 @@ body.mode-display {
 
 .next-card .next-label {
   color: var(--text-muted);
-  font-size: 1vw;
+  font-size: clamp(12px, 1.9vmin, 20px);
   margin-bottom: 4px;
 }
 
 .next-card .next-name {
-  font-size: 2.6vw;
+  font-size: clamp(22px, 4.6vmin, 46px);
   font-weight: 700;
 }
 
@@ -232,7 +259,7 @@ body.mode-display {
   padding: 6px 14px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
-  font-size: 1vw;
+  font-size: clamp(12px, 1.9vmin, 20px);
   font-variant-numeric: tabular-nums;
 }
 
@@ -241,12 +268,12 @@ body.mode-display {
 }
 
 .next-card .next-icon {
-  font-size: 2.4vw;
+  font-size: clamp(20px, 4.2vmin, 42px);
   line-height: 1;
 }
 
 .next-card .next-time {
-  font-size: 2.4vw;
+  font-size: clamp(20px, 4.2vmin, 42px);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   margin-top: 6px;
@@ -258,7 +285,7 @@ body.mode-display {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 22px;
-  padding: 0.6vh 2vw;
+  padding: 0.6vh 2.4vmin;
   margin-bottom: 1.6vh;
 }
 
@@ -268,7 +295,7 @@ body.mode-display {
   justify-content: space-between;
   padding: 1.5vh 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 1.3vw;
+  font-size: clamp(14px, 2.4vmin, 24px);
 }
 .list-row:last-child { border-bottom: none; }
 
@@ -279,7 +306,7 @@ body.mode-display {
   color: var(--text-muted);
 }
 
-.list-row .row-icon { font-size: 1.4vw; }
+.list-row .row-icon { font-size: clamp(15px, 2.6vmin, 26px); }
 
 .list-row.current .row-left,
 .list-row.current .row-time {
@@ -297,7 +324,7 @@ body.mode-display {
 
 .list-row .row-check {
   color: var(--accent);
-  font-size: 1.1vw;
+  font-size: clamp(13px, 2vmin, 20px);
 }
 
 /* Ayah of the Day card */
@@ -306,7 +333,7 @@ body.mode-display {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 22px;
-  padding: 2vh 2vw;
+  padding: 2vh 2.4vmin;
   margin-bottom: 1.6vh;
   text-align: center;
   transition: opacity 0.6s ease;
@@ -314,14 +341,14 @@ body.mode-display {
 
 .verse-card .verse-label {
   color: var(--text-muted);
-  font-size: 0.9vw;
+  font-size: clamp(11px, 1.7vmin, 18px);
   text-transform: uppercase;
   letter-spacing: 1.4px;
   margin-bottom: 10px;
 }
 
 .verse-arabic {
-  font-size: 2vw;
+  font-size: clamp(18px, 3.6vmin, 38px);
   line-height: 1.8;
   font-family: 'Traditional Arabic', 'Scheherazade New', 'Amiri', serif;
   direction: rtl;
@@ -329,7 +356,7 @@ body.mode-display {
 
 .verse-translation {
   margin-top: 10px;
-  font-size: 1vw;
+  font-size: clamp(12px, 1.9vmin, 20px);
   color: var(--text-muted);
 }
 
@@ -337,7 +364,7 @@ body.mode-display {
 
 .ticker-bar {
   width: 100%;
-  max-width: 640px;
+  max-width: 900px;
   background: var(--card-bg-strong);
   border: 1px solid var(--card-border);
   border-radius: 16px 16px 0 0;
@@ -348,9 +375,13 @@ body.mode-display {
   margin-top: auto;
 }
 
+@media (orientation: landscape) and (min-width: 900px) {
+  .ticker-bar { max-width: 1500px; }
+}
+
 .ticker {
   display: inline-block;
-  font-size: 1vw;
+  font-size: clamp(12px, 1.9vmin, 20px);
   color: var(--text);
   padding-left: 100%;
   animation: scroll-left 32s linear infinite;
