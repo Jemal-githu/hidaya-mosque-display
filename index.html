@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hidaya AI — Mosque Display</title>
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -21,6 +21,14 @@
 
     <label class="field-label">2. Mosque name</label>
     <input type="text" id="mosqueNameInput" placeholder="e.g. Timrå Islamiska Center">
+
+    <label class="field-label">Mosque logo (optional)</label>
+    <p class="field-hint">Shown next to the mosque name instead of the default icon.</p>
+    <input type="file" id="logoInput" accept="image/*">
+    <div id="logoPreviewWrap" class="logo-preview-wrap hidden">
+      <img id="logoPreview" class="logo-preview" alt="Logo preview">
+      <button type="button" id="logoRemoveBtn" class="logo-remove-btn">Remove</button>
+    </div>
 
     <label class="field-label">3. Donation details (optional)</label>
     <p class="field-hint">Shown scrolling at the bottom of the display so visitors can support the mosque.</p>
@@ -42,7 +50,11 @@
   <div class="content-col">
     <div class="top-bar">
       <div class="mosque-block">
-        <div class="mosque-name">🕌 <span id="mosqueNameOut"></span></div>
+        <div class="mosque-name">
+          <img id="mosqueLogoOut" class="mosque-logo hidden" alt="">
+          <span id="mosqueIconOut">🕌</span>
+          <span id="mosqueNameOut"></span>
+        </div>
         <div class="hijri-line" id="hijriOut"></div>
       </div>
       <div class="date-block">
@@ -67,8 +79,8 @@
   </div>
 </div>
 
-<script src="hijri.js?v=3"></script>
-<script src="verses.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="hijri.js?v=4"></script>
+<script src="verses.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

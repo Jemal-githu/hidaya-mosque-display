@@ -19,8 +19,67 @@ const announcementInput = document.getElementById('announcementInput');
 const startBtn = document.getElementById('startBtn');
 const setupError = document.getElementById('setupError');
 const settingsBtn = document.getElementById('settingsBtn');
+const logoInput = document.getElementById('logoInput');
+const logoPreviewWrap = document.getElementById('logoPreviewWrap');
+const logoPreview = document.getElementById('logoPreview');
+const logoRemoveBtn = document.getElementById('logoRemoveBtn');
 
 let parsedTimetable = null; // { months: { '1': { '1': {Fajr:..,...}, ... }, ... } }
+let logoDataUrl = null; // small resized data: URL, or null for the default mosque icon
+
+// Resizes/re-encodes the uploaded image down to a small square so it fits
+// comfortably in localStorage (a raw phone photo can be several MB, which
+// risks hitting the ~5-10MB localStorage quota) and loads instantly on the
+// TV regardless of the original file size.
+function resizeImageToDataUrl(file, maxSize) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function showLogoPreview(dataUrl) {
+  if (dataUrl) {
+    logoPreview.src = dataUrl;
+    logoPreviewWrap.classList.remove('hidden');
+  } else {
+    logoPreviewWrap.classList.add('hidden');
+  }
+}
+
+logoInput.addEventListener('change', async () => {
+  const file = logoInput.files[0];
+  if (!file) return;
+  try {
+    logoDataUrl = await resizeImageToDataUrl(file, 200);
+    showLogoPreview(logoDataUrl);
+  } catch (e) {
+    logoDataUrl = null;
+    showLogoPreview(null);
+  }
+});
+
+logoRemoveBtn.addEventListener('click', () => {
+  logoDataUrl = null;
+  logoInput.value = '';
+  showLogoPreview(null);
+});
 
 // ── Setup view wiring ───────────────────────────────────────────────────
 
@@ -65,9 +124,18 @@ startBtn.addEventListener('click', () => {
     swish: swishInput.value.trim(),
     account: accountInput.value.trim(),
     announcement: announcementInput.value.trim(),
+    logo: logoDataUrl,
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-  setupError.textContent = '';
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  } catch (e) {
+    // Quota exceeded (rare, only with an unusually large logo after resize)
+    // — fall back to starting without the logo rather than failing silently.
+    config.logo = null;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    setupError.textContent = 'Logo was too large to save — display started without it.';
+  }
+  if (!setupError.textContent) setupError.textContent = '';
   startDisplay(config);
 });
 
@@ -83,6 +151,8 @@ settingsBtn.addEventListener('click', () => {
     accountInput.value = saved.account || '';
     announcementInput.value = saved.announcement || '';
     parsedTimetable = saved.timetable;
+    logoDataUrl = saved.logo || null;
+    showLogoPreview(logoDataUrl);
     fileStatus.textContent = 'Using previously loaded timetable — choose a new file to replace it.';
     fileStatus.className = 'file-status ok';
     updateStartButton();
@@ -123,6 +193,17 @@ function startDisplay(config) {
   document.body.classList.add('mode-display');
 
   document.getElementById('mosqueNameOut').textContent = config.mosqueName || 'Hidaya AI';
+
+  const logoImg = document.getElementById('mosqueLogoOut');
+  const iconSpan = document.getElementById('mosqueIconOut');
+  if (config.logo) {
+    logoImg.src = config.logo;
+    logoImg.classList.remove('hidden');
+    iconSpan.classList.add('hidden');
+  } else {
+    logoImg.classList.add('hidden');
+    iconSpan.classList.remove('hidden');
+  }
 
   const tickerParts = [];
   if (config.announcement) tickerParts.push(`📢 ${config.announcement}`);

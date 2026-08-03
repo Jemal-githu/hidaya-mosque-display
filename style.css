@@ -102,6 +102,33 @@ body.mode-display {
 .file-status.ok { color: var(--accent); }
 .file-status.err { color: #fca5a5; }
 
+.logo-preview-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.logo-preview {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px;
+}
+
+.logo-remove-btn {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.logo-remove-btn:hover { color: var(--text); }
+
 .start-btn {
   margin-top: 26px;
   width: 100%;
@@ -205,7 +232,14 @@ body.mode-display {
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.mosque-logo {
+  height: clamp(24px, 4.4vmin, 44px);
+  width: clamp(24px, 4.4vmin, 44px);
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .mosque-block .hijri-line {
