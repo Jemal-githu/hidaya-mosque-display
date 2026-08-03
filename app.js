@@ -289,8 +289,8 @@ function startDisplay(config) {
   // read in one glance. The Hidaya AI branding line always plays last.
   const tickerParts = [];
   if (config.announcement) tickerParts.push(config.announcement);
-  if (config.swish) tickerParts.push(`${t(lang, 'support')} ${config.mosqueName || ''} — Swish: ${config.swish}`);
-  if (config.account) tickerParts.push(`${t(lang, 'bankAccount')}: ${config.account}`);
+  if (config.swish) tickerParts.push(`💚 ${t(lang, 'support')} ${config.mosqueName || ''} — Swish: ${config.swish}`);
+  if (config.account) tickerParts.push(`🏦 ${t(lang, 'bankAccount')}: ${config.account}`);
   tickerParts.push(`BRAND:${t(lang, 'poweredBy')}`);
   startTicker(tickerParts);
 
