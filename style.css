@@ -207,13 +207,19 @@ body.mode-display {
     max-width: 1500px;
     display: grid;
     grid-template-columns: 1.1fr 1fr;
-    grid-template-rows: auto 1fr;
+    /* All rows auto-sized to their own content — NOT 1fr, which was
+       stretching next-card/verse-card to fill leftover vertical space
+       far beyond what their text actually needed. Any true leftover
+       space now just stays empty background instead of inflating the
+       cards. */
+    align-items: start;
     column-gap: 2vw;
+    row-gap: 1.6vh;
   }
   .top-bar { grid-column: 1 / -1; }
-  .next-card { grid-column: 1; }
-  .list-card { grid-column: 1; }
-  .verse-card { grid-column: 2; grid-row: 2; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+  .next-card { grid-column: 1; grid-row: 2; }
+  .list-card { grid-column: 1; grid-row: 3; }
+  .verse-card { grid-column: 2; grid-row: 2 / span 2; }
 }
 
 /* Top bar: mosque name + Hijri date (left) / big animated clock + Gregorian date (right) */
