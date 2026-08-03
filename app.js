@@ -34,9 +34,47 @@ const logoInput = document.getElementById('logoInput');
 const logoPreviewWrap = document.getElementById('logoPreviewWrap');
 const logoPreview = document.getElementById('logoPreview');
 const logoRemoveBtn = document.getElementById('logoRemoveBtn');
+const useLocationBtn = document.getElementById('useLocationBtn');
+const locationStatus = document.getElementById('locationStatus');
+const autoMethodWrap = document.getElementById('autoMethodWrap');
+const calcMethodSelect = document.getElementById('calcMethodSelect');
+const languageSelect = document.getElementById('languageSelect');
 
 let parsedTimetable = null; // { months: { '1': { '1': {Fajr:..,...}, ... }, ... } }
 let logoDataUrl = null; // small resized data: URL, or null for the default mosque icon
+let autoLocation = null; // { lat, lng } for mosques without a timetable file
+let sourceMode = null; // 'file' | 'auto' — whichever the admin used most recently
+
+// ── Automatic location-based prayer times ───────────────────────────────
+// For mosques that haven't shared a printed timetable — calculates times
+// from this screen's own GPS location instead of reading an uploaded file.
+
+useLocationBtn.addEventListener('click', () => {
+  if (!navigator.geolocation) {
+    locationStatus.textContent = 'This browser does not support location detection.';
+    locationStatus.className = 'file-status err';
+    return;
+  }
+  locationStatus.textContent = 'Detecting location…';
+  locationStatus.className = 'file-status';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      autoLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      sourceMode = 'auto';
+      locationStatus.textContent = `Location detected (±${Math.round(pos.coords.accuracy)}m). Prayer times will be calculated automatically.`;
+      locationStatus.className = 'file-status ok';
+      autoMethodWrap.classList.remove('hidden');
+      updateStartButton();
+    },
+    (err) => {
+      autoLocation = null;
+      locationStatus.textContent = 'Could not get location — check the browser has location permission for this page.';
+      locationStatus.className = 'file-status err';
+      updateStartButton();
+    },
+    { enableHighAccuracy: false, timeout: 15000 }
+  );
+});
 
 // Resizes/re-encodes the uploaded image down to a small square so it fits
 // comfortably in localStorage (a raw phone photo can be several MB, which
@@ -105,6 +143,7 @@ fileInput.addEventListener('change', () => {
         throw new Error('not a full-year timetable file');
       }
       parsedTimetable = json;
+      sourceMode = 'file';
       const monthCount = Object.keys(json.months).length;
       fileStatus.textContent = `Loaded ${monthCount} month(s) of prayer times.`;
       fileStatus.className = 'file-status ok';
@@ -123,14 +162,20 @@ fileInput.addEventListener('change', () => {
 });
 
 function updateStartButton() {
-  startBtn.disabled = !(parsedTimetable && mosqueNameInput.value.trim());
+  const hasSource = (sourceMode === 'file' && parsedTimetable) || (sourceMode === 'auto' && autoLocation);
+  startBtn.disabled = !(hasSource && mosqueNameInput.value.trim());
 }
 mosqueNameInput.addEventListener('input', updateStartButton);
 
 startBtn.addEventListener('click', () => {
-  if (!parsedTimetable) return;
+  const hasSource = (sourceMode === 'file' && parsedTimetable) || (sourceMode === 'auto' && autoLocation);
+  if (!hasSource) return;
   const config = {
-    timetable: parsedTimetable,
+    mode: sourceMode,
+    timetable: sourceMode === 'file' ? parsedTimetable : null,
+    autoLocation: sourceMode === 'auto' ? autoLocation : null,
+    calcMethod: calcMethodSelect.value,
+    language: languageSelect.value,
     mosqueName: mosqueNameInput.value.trim(),
     swish: swishInput.value.trim(),
     account: accountInput.value.trim(),
@@ -161,11 +206,23 @@ settingsBtn.addEventListener('click', () => {
     swishInput.value = saved.swish || '';
     accountInput.value = saved.account || '';
     announcementInput.value = saved.announcement || '';
-    parsedTimetable = saved.timetable;
     logoDataUrl = saved.logo || null;
     showLogoPreview(logoDataUrl);
-    fileStatus.textContent = 'Using previously loaded timetable — choose a new file to replace it.';
-    fileStatus.className = 'file-status ok';
+    calcMethodSelect.value = saved.calcMethod || 'mwl';
+    languageSelect.value = saved.language || 'en';
+    sourceMode = saved.mode || (saved.timetable ? 'file' : null);
+
+    if (sourceMode === 'auto' && saved.autoLocation) {
+      autoLocation = saved.autoLocation;
+      autoMethodWrap.classList.remove('hidden');
+      locationStatus.textContent = 'Using previously detected location — click the button again to refresh it.';
+      locationStatus.className = 'file-status ok';
+    } else if (saved.timetable) {
+      parsedTimetable = saved.timetable;
+      sourceMode = 'file';
+      fileStatus.textContent = 'Using previously loaded timetable — choose a new file to replace it.';
+      fileStatus.className = 'file-status ok';
+    }
     updateStartButton();
   }
 });
@@ -192,9 +249,13 @@ function stopClocks() {
 }
 
 function timesForDate(config, date) {
+  if (config.mode === 'auto' && config.autoLocation) {
+    const tzOffsetHours = -date.getTimezoneOffset() / 60;
+    return calculatePrayerTimes(date, config.autoLocation.lat, config.autoLocation.lng, tzOffsetHours, config.calcMethod);
+  }
   const month = String(date.getMonth() + 1);
   const day = String(date.getDate());
-  const monthData = config.timetable.months[month];
+  const monthData = config.timetable && config.timetable.months[month];
   return monthData ? monthData[day] : null;
 }
 
@@ -216,13 +277,16 @@ function startDisplay(config) {
     iconSpan.classList.remove('hidden');
   }
 
+  const lang = config.language || 'en';
+  document.getElementById('verseLabelOut').textContent = t(lang, 'ayahOfDay');
+
   const tickerParts = [];
   if (config.announcement) tickerParts.push(`📢 ${config.announcement}`);
-  if (config.swish) tickerParts.push(`💚 Support ${config.mosqueName || 'the mosque'} — Swish: ${config.swish}`);
-  if (config.account) tickerParts.push(`🏦 Bank account: ${config.account}`);
+  if (config.swish) tickerParts.push(`💚 ${t(lang, 'support')} ${config.mosqueName || ''} — Swish: ${config.swish}`);
+  if (config.account) tickerParts.push(`🏦 ${t(lang, 'bankAccount')}: ${config.account}`);
   document.getElementById('tickerOut').textContent = tickerParts.length
       ? tickerParts.join('     •     ')
-      : `🕌 ${config.mosqueName || 'Hidaya AI'} — powered by Hidaya AI`;
+      : `🕌 ${config.mosqueName || 'Hidaya AI'} — ${t(lang, 'poweredBy')}`;
 
   renderPrayerRow(config);
   tickClock(config);
@@ -255,7 +319,7 @@ function renderPrayerRow(config) {
   listCard.innerHTML = '';
 
   if (!todayTimes) {
-    listCard.innerHTML = '<div class="list-row">No prayer times found for today — check the imported file covers this month.</div>';
+    listCard.innerHTML = `<div class="list-row">${t(config.language || 'en', 'noTimesToday')}</div>`;
     nextCard.innerHTML = '';
     return;
   }
@@ -302,12 +366,14 @@ function upcomingPrayerTargets(config, now) {
   return targets.sort((a, b) => a.target - b.target);
 }
 
-function formatCountdown(ms) {
+function formatCountdown(ms, lang) {
   const totalMin = Math.max(0, Math.floor(ms / 60000));
   const h = Math.floor(totalMin / 60);
   const m = totalMin % 60;
-  if (h > 0) return `in ${h}h ${m}m`;
-  return `in ${m}m`;
+  const inWord = t(lang, 'inPrefix');
+  const prefix = inWord ? `${inWord} ` : '';
+  if (h > 0) return `${prefix}${h}${t(lang, 'hours')} ${m}${t(lang, 'minutes')}`;
+  return `${prefix}${m}${t(lang, 'minutes')}`;
 }
 
 function tickClock(config) {
@@ -333,12 +399,13 @@ function tickClock(config) {
     const row = document.getElementById(`lrow-${next.name}`);
     if (row) row.classList.add('current');
 
+    const lang = config.language || 'en';
     const nextCard = document.getElementById('nextCard');
     nextCard.innerHTML = `
       <div>
-        <div class="next-label">Next Prayer</div>
+        <div class="next-label">${t(lang, 'nextPrayer')}</div>
         <div class="next-name">${next.name}</div>
-        <div class="next-countdown">${formatCountdown(next.target - now)}</div>
+        <div class="next-countdown">${formatCountdown(next.target - now, lang)}</div>
       </div>
       <div class="next-right">
         <div class="next-icon">${PRAYER_ICONS[next.name] || ''}</div>
@@ -352,7 +419,7 @@ function tickClock(config) {
 
 (function boot() {
   const saved = loadConfig();
-  if (saved && saved.timetable) {
+  if (saved && (saved.timetable || (saved.mode === 'auto' && saved.autoLocation))) {
     startDisplay(saved);
   }
 })();
