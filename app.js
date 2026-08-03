@@ -75,6 +75,7 @@ settingsBtn.addEventListener('click', () => {
   stopClocks();
   displayView.classList.add('hidden');
   setupView.classList.remove('hidden');
+  document.body.classList.remove('mode-display');
   const saved = loadConfig();
   if (saved) {
     mosqueNameInput.value = saved.mosqueName || '';
@@ -119,6 +120,7 @@ function timesForDate(config, date) {
 function startDisplay(config) {
   setupView.classList.add('hidden');
   displayView.classList.remove('hidden');
+  document.body.classList.add('mode-display');
 
   document.getElementById('mosqueNameOut').textContent = config.mosqueName || 'Hidaya AI';
 

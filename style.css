@@ -18,11 +18,20 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
   color: var(--text);
   font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* The TV display view is a fixed, non-scrolling full screen; the setup
+   form can be taller than the window (many fields) so it needs to scroll
+   on shorter screens instead of clipping the Start button off the bottom.
+   Toggled via a body class in app.js rather than a :has() selector, since
+   older TV browsers (Tizen/WebOS/embedded WebViews) may not support :has(). */
+body.mode-display {
   overflow: hidden;
+  height: 100%;
 }
 
 .hidden { display: none !important; }
@@ -35,6 +44,7 @@ html, body {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  overflow-y: auto;
 }
 
 .setup-card {
