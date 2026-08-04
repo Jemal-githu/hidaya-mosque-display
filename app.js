@@ -722,9 +722,14 @@ generateLinkBtn.addEventListener('click', async () => {
   const config = buildConfigFromForm();
   const encoded = await encodeConfigForLink(config);
   const longUrl = `${location.origin}${location.pathname}?c=${encoded}`;
+  console.log(`TV link: raw config ${JSON.stringify(config).length} chars → encoded ${encoded.length} chars`);
 
-  if (encoded.length > 6000) {
-    tvLinkStatus.textContent = 'This setup is too large for a link even after compression — use "Download Offline Version" below instead, or switch to automatic/city-based prayer times for a link this short can carry.';
+  // Raised well above what any realistic timetable should ever need after
+  // compression — this is now just a sane upper bound so the browser
+  // itself doesn't choke on an absurdly long URL, not a tight limit meant
+  // to reject normal mosque timetables.
+  if (encoded.length > 30000) {
+    tvLinkStatus.textContent = `This setup is too large for a link even after compression (${encoded.length.toLocaleString()} characters) — use "Download Offline Version" below instead, or switch to automatic/city-based prayer times for a link this short can carry.`;
     tvLinkStatus.className = 'file-status err';
     return;
   }
@@ -737,7 +742,7 @@ generateLinkBtn.addEventListener('click', async () => {
   tvLinkResult.classList.remove('hidden');
   tvLinkStatus.textContent = short
       ? 'Type this short link on the TV\'s browser — everything above will load automatically.'
-      : 'Could not shorten the link (no internet right now?) — this longer link still works the same way.';
+      : `Could not shorten this link (${longUrl.length.toLocaleString()} characters) — every shortening service rejected it, possibly because it's still long for their limits. It still works the same way if typed carefully, or scan the QR code instead.`;
   tvLinkStatus.className = 'file-status ok';
 });
 
