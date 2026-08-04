@@ -1,3 +1,12 @@
+/* The phone app's actual brand wordmark font (lib/main.dart's "HIDAYA"
+   header uses fontFamily: 'Agressive', assets/fonts/AGRESSIVE.otf) —
+   reused here so the footer branding matches the real app exactly. */
+@font-face {
+  font-family: 'Agressive';
+  src: url('agressive.otf') format('opentype');
+  font-display: swap;
+}
+
 /* Colors match the phone app's "Ocean Teal" theme exactly
    (app_settings.dart _themes['teal']) so the display and the app feel
    like the same product. */
@@ -508,9 +517,8 @@ body.mode-display {
 }
 
 .brand-logo-text {
-  font-family: 'Anton', 'Poppins', 'Segoe UI', sans-serif;
-  font-weight: 400; /* Anton is a single-weight display face, already very heavy */
+  font-family: 'Agressive', 'Anton', 'Poppins', 'Segoe UI', sans-serif;
   color: #ffffff;
-  letter-spacing: 1.5px;
-  font-size: clamp(13px, 2vmin, 20px);
+  letter-spacing: 1px;
+  font-size: clamp(15px, 2.3vmin, 24px);
 }
