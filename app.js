@@ -283,14 +283,18 @@ function startDisplay(config) {
   const lang = config.language || 'en';
   document.getElementById('verseLabelOut').textContent = t(lang, 'ayahOfDay');
 
-  // Build the rotating ticker messages — one full sentence shown at a time
-  // (fades in, holds, fades out, then the next one appears) rather than a
-  // single long line scrolling continuously, so each message is easy to
-  // read in one glance. The Hidaya AI branding line always plays last.
+  // Build the rotating ticker messages — one sentence scrolls fully across
+  // at a time before the next appears. Swish + bank account are combined
+  // into ONE sentence (rather than two separate messages) since they're
+  // both "how to donate" info that reads naturally together.
   const tickerParts = [];
   if (config.announcement) tickerParts.push(config.announcement);
-  if (config.swish) tickerParts.push(`💚 ${t(lang, 'support')} ${config.mosqueName || ''} — Swish: ${config.swish}`);
-  if (config.account) tickerParts.push(`🏦 ${t(lang, 'bankAccount')}: ${config.account}`);
+  if (config.swish || config.account) {
+    const donateBits = [`💚 ${t(lang, 'support')} ${config.mosqueName || ''}`];
+    if (config.swish) donateBits.push(`Swish: ${config.swish}`);
+    if (config.account) donateBits.push(`🏦 ${t(lang, 'bankAccount')}: ${config.account}`);
+    tickerParts.push(donateBits.join(' — '));
+  }
   tickerParts.push(`BRAND:${t(lang, 'poweredBy')}`);
   startTicker(tickerParts);
 
