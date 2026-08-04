@@ -466,9 +466,9 @@ body.mode-display {
   border: 1px solid var(--card-border);
   border-radius: 16px 16px 0 0;
   border-bottom: none;
-  padding: 1.8vh 24px;
+  padding: 1.8vh 0;
   overflow: hidden;
-  text-align: center;
+  position: relative;
   margin-top: auto;
 }
 
@@ -476,15 +476,18 @@ body.mode-display {
   .ticker-bar { max-width: 1500px; }
 }
 
-/* Messages fade in/out one at a time (see startTicker() in app.js) rather
-   than scrolling continuously, so each sentence is readable in one glance. */
+/* Continuous right-to-left scroll, but only ONE message at a time — each
+   fully crosses the bar before the next one starts (see startTicker() in
+   app.js, which computes --ticker-start/--ticker-end per message and
+   restarts the animation on 'animationend'). */
 .ticker {
-  display: inline-block;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  white-space: nowrap;
   font-size: clamp(16px, 2.8vmin, 30px);
   font-weight: 600;
   color: var(--text);
-  transition: opacity 0.5s ease;
-  white-space: normal;
 }
 
 .brand-logo-text {

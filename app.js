@@ -240,15 +240,15 @@ function loadConfig() {
 
 let clockTimer = null;
 let verseTimer = null;
-let tickerTimer = null;
+let tickerCancel = null; // cancels the ticker's requestAnimationFrame loop
 
 function stopClocks() {
   if (clockTimer) clearInterval(clockTimer);
   if (verseTimer) clearInterval(verseTimer);
-  if (tickerTimer) clearInterval(tickerTimer);
+  if (tickerCancel) tickerCancel();
   clockTimer = null;
   verseTimer = null;
-  tickerTimer = null;
+  tickerCancel = null;
 }
 
 function timesForDate(config, date) {
@@ -306,32 +306,57 @@ function startDisplay(config) {
   }, 25000);
 }
 
-// Shows the ticker messages one at a time — fades in, holds for a few
-// seconds, fades out, then the next message takes its place — instead of
-// one long line scrolling continuously, so each sentence is easy to read
-// at a glance from across the room.
+// Shows the ticker messages one at a time, each scrolling continuously
+// right-to-left across the full bar (like a classic marquee) rather than
+// one long line with every message joined together — so only one
+// sentence is ever moving/visible at once, but the motion itself stays
+// continuous. Driven by requestAnimationFrame with a plain inline
+// `transform` rather than a CSS @keyframes animation — a CSS animation
+// whose keyframes reference custom properties (needed here since the
+// scroll distance depends on each message's own text width) failed to
+// actually start in testing (getAnimations() came back empty even
+// though computed style reported it as "running"), and a manual rAF
+// loop sidesteps that entirely while also being about as universally
+// supported as anything gets across embedded/TV browsers.
 function startTicker(messages) {
   const tickerEl = document.getElementById('tickerOut');
+  const barEl = tickerEl.parentElement;
   let index = 0;
-  const HOLD_MS = 6000;
-  const FADE_MS = 500;
+  const SPEED_PX_PER_SEC = 140;
+  let rafId = null;
 
-  function showNext() {
-    tickerEl.style.opacity = 0;
-    setTimeout(() => {
-      const msg = messages[index];
-      if (msg.startsWith('BRAND:')) {
-        tickerEl.innerHTML = `<span class="brand-line">${msg.slice(6)} <span class="brand-logo-text"><span class="brand-hidaya">HIDAYA</span> <span class="brand-ai">AI</span></span></span>`;
+  function playNext() {
+    const msg = messages[index];
+    index = (index + 1) % messages.length;
+
+    if (msg.startsWith('BRAND:')) {
+      tickerEl.innerHTML = `<span class="brand-line">${msg.slice(6)} <span class="brand-logo-text"><span class="brand-hidaya">HIDAYA</span> <span class="brand-ai">AI</span></span></span>`;
+    } else {
+      tickerEl.textContent = msg;
+    }
+
+    const startX = barEl.clientWidth;
+    const endX = -tickerEl.scrollWidth;
+    const distance = startX - endX;
+    const durationMs = (distance / SPEED_PX_PER_SEC) * 1000;
+    const startTime = performance.now();
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / durationMs);
+      const x = startX - progress * distance;
+      tickerEl.style.transform = `translate(${x}px, -50%)`;
+      if (progress < 1) {
+        rafId = requestAnimationFrame(step);
       } else {
-        tickerEl.textContent = msg;
+        playNext();
       }
-      tickerEl.style.opacity = 1;
-      index = (index + 1) % messages.length;
-    }, FADE_MS);
+    }
+    rafId = requestAnimationFrame(step);
   }
 
-  showNext();
-  tickerTimer = setInterval(showNext, HOLD_MS);
+  tickerCancel = () => { if (rafId) cancelAnimationFrame(rafId); };
+  playNext();
 }
 
 function showVerse(index) {
