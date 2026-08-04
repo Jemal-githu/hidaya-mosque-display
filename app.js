@@ -636,12 +636,42 @@ function decodeConfigFromLink(str) {
   return JSON.parse(json);
 }
 
+// Tries several free shorteners in sequence — not every one of these
+// allows cross-origin calls from browser JS (many are built for
+// curl/server-side use and silently reject or block fetch() with no
+// useful error), so one failing isn't necessarily "offline"; trying a
+// few real alternatives meaningfully raises the odds one actually works
+// from a given network/browser.
 async function shortenUrl(longUrl) {
-  try {
-    const res = await fetch(`https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`);
-    const text = await res.text();
-    if (text.startsWith('https://is.gd/')) return text.trim();
-  } catch (e) { /* offline, or the shortener is unreachable — fall back below */ }
+  const attempts = [
+    async () => {
+      const res = await fetch(`https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`);
+      const text = (await res.text()).trim();
+      return text.startsWith('https://is.gd/') ? text : null;
+    },
+    async () => {
+      const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+      const text = (await res.text()).trim();
+      return text.startsWith('https://tinyurl.com/') ? text : null;
+    },
+    async () => {
+      const res = await fetch('https://cleanuri.com/api/v1/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `url=${encodeURIComponent(longUrl)}`,
+      });
+      const data = await res.json();
+      return data.result_url || null;
+    },
+  ];
+  for (const attempt of attempts) {
+    try {
+      const result = await attempt();
+      if (result) return result;
+    } catch (e) {
+      console.warn('Shortener attempt failed:', e);
+    }
+  }
   return null;
 }
 
