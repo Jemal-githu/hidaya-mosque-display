@@ -620,18 +620,52 @@ function base64ToBytes(b64) {
 
 // URL-safe base64 (- _ instead of + /, no padding) so it survives being
 // pasted/typed as a URL query value without extra encoding headaches.
-function encodeConfigForLink(config) {
+async function gzipBytes(bytes) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+async function gunzipBytes(bytes) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+// A full year's timetable (12 months × ~30 days × 6 prayer times) is a lot
+// of repetitive JSON — gzip shrinks that dramatically (day/prayer-name
+// keys and time-string patterns repeat constantly), often by 80%+, which
+// is the difference between "link too long" and a perfectly normal one.
+// CompressionStream is supported in every current mainstream browser, but
+// falls back to plain (uncompressed) encoding on anything ancient that
+// lacks it — a 1-byte prefix flag records which format a given link uses
+// so decoding always knows which path to take.
+async function encodeConfigForLink(config) {
   const trimmed = { ...config };
   delete trimmed.logo; // logos are per-device customization, not worth the URL bloat/risk
   const json = JSON.stringify(trimmed);
-  const bytes = new TextEncoder().encode(json);
-  return bytesToBase64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const rawBytes = new TextEncoder().encode(json);
+
+  let flag = 0;
+  let payload = rawBytes;
+  if (typeof CompressionStream !== 'undefined') {
+    try {
+      payload = await gzipBytes(rawBytes);
+      flag = 1;
+    } catch (e) { /* fall back to uncompressed below */ }
+  }
+
+  const combined = new Uint8Array(payload.length + 1);
+  combined[0] = flag;
+  combined.set(payload, 1);
+  return bytesToBase64(combined).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function decodeConfigFromLink(str) {
+async function decodeConfigFromLink(str) {
   let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
   while (b64.length % 4) b64 += '=';
-  const bytes = base64ToBytes(b64);
+  const combined = base64ToBytes(b64);
+  const flag = combined[0];
+  const payload = combined.slice(1);
+  const bytes = flag === 1 ? await gunzipBytes(payload) : payload;
   const json = new TextDecoder().decode(bytes);
   return JSON.parse(json);
 }
@@ -686,11 +720,11 @@ generateLinkBtn.addEventListener('click', async () => {
   tvLinkResult.classList.add('hidden');
 
   const config = buildConfigFromForm();
-  const encoded = encodeConfigForLink(config);
+  const encoded = await encodeConfigForLink(config);
   const longUrl = `${location.origin}${location.pathname}?c=${encoded}`;
 
-  if (encoded.length > 1800) {
-    tvLinkStatus.textContent = 'This setup is too large for a link (a full-year timetable file is a lot of data) — use "Download Offline Version" below instead, or switch to automatic/city-based prayer times for a link this short can carry.';
+  if (encoded.length > 6000) {
+    tvLinkStatus.textContent = 'This setup is too large for a link even after compression — use "Download Offline Version" below instead, or switch to automatic/city-based prayer times for a link this short can carry.';
     tvLinkStatus.className = 'file-status err';
     return;
   }
@@ -824,7 +858,7 @@ function tryLoadSharedFile() {
   }
 }
 
-(function boot() {
+(async function boot() {
   if (tryLoadSharedFile()) return;
 
   // A config baked into the URL (see "Generate Link for TV") takes
@@ -834,7 +868,7 @@ function tryLoadSharedFile() {
   const urlConfig = new URLSearchParams(location.search).get('c');
   if (urlConfig) {
     try {
-      const config = decodeConfigFromLink(urlConfig);
+      const config = await decodeConfigFromLink(urlConfig);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       startDisplay(config);
       return;
