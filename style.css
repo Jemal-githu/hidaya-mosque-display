@@ -78,6 +78,50 @@ body.mode-display {
   font-size: 14px;
 }
 
+/* Each numbered step is its own visually separated block, so the form
+   reads as a guided sequence instead of one long continuous scroll. */
+.setup-step {
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 16px 18px 20px;
+  margin-bottom: 16px;
+}
+.setup-step:last-of-type { margin-bottom: 0; }
+.setup-step-muted { background: rgba(0, 0, 0, 0.22); }
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #06201c;
+  font-size: 13px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+.step-icon { font-size: 18px; flex: 0 0 auto; }
+.step-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.setup-step .field-label:first-child,
+.setup-step > input:first-of-type,
+.setup-step > select:first-of-type {
+  margin-top: 0;
+}
+
 .field-label {
   display: block;
   font-weight: 600;

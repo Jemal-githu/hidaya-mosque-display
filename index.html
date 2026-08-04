@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 
@@ -17,94 +17,109 @@
     <h1>HIDAYA AI — Mosque Display</h1>
     <p class="setup-sub">Set this screen up once, then leave it running on your mosque's TV.</p>
 
-    <label class="field-label">1. Prayer times</label>
-    <p class="field-hint">Export "Share Full Year Timetable" from the Hidaya AI phone app, then upload that file here.</p>
-    <input type="file" id="fileInput" accept=".hidaya,application/json">
-    <div id="fileStatus" class="file-status"></div>
+    <div class="setup-step">
+      <div class="step-header"><span class="step-num">1</span><span class="step-title">Prayer times</span></div>
+      <p class="field-hint">Export "Share Full Year Timetable" from the Hidaya AI phone app, then upload that file here.</p>
+      <input type="file" id="fileInput" accept=".hidaya,application/json">
+      <div id="fileStatus" class="file-status"></div>
 
-    <div class="or-divider"><span>OR — no timetable file?</span></div>
+      <div class="or-divider"><span>OR — no timetable file?</span></div>
+      <p class="field-hint">Calculate prayer times automatically instead. A mosque's own timetable (above) should still be preferred when available, since local committee conventions can differ slightly from pure calculation.</p>
 
-    <p class="field-hint">Calculate prayer times automatically instead. Best when a mosque hasn't shared a printed timetable — a mosque's own timetable (above) should still be preferred when available, since local committee conventions can differ slightly from pure calculation.</p>
+      <button type="button" id="useLocationBtn" class="secondary-btn">📍 Use This Screen's GPS Location</button>
 
-    <button type="button" id="useLocationBtn" class="secondary-btn">📍 Use This Screen's GPS Location</button>
+      <label class="field-label">No internet/GPS on this screen? Pick a nearby city instead</label>
+      <select id="citySelect" class="setup-select">
+        <option value="">— Select a city —</option>
+      </select>
 
-    <label class="field-label">No internet/GPS on this screen? Pick a nearby city instead</label>
-    <select id="citySelect" class="setup-select">
-      <option value="">— Select a city —</option>
-    </select>
+      <label class="field-label">Or enter exact coordinates manually</label>
+      <div class="coord-row">
+        <input type="text" id="manualLatInput" placeholder="Latitude e.g. 6.5244">
+        <input type="text" id="manualLngInput" placeholder="Longitude e.g. 3.3792">
+        <button type="button" id="manualCoordBtn" class="secondary-btn">Use</button>
+      </div>
 
-    <label class="field-label">Or enter exact coordinates manually</label>
-    <div class="coord-row">
-      <input type="text" id="manualLatInput" placeholder="Latitude e.g. 6.5244">
-      <input type="text" id="manualLngInput" placeholder="Longitude e.g. 3.3792">
-      <button type="button" id="manualCoordBtn" class="secondary-btn">Use</button>
+      <div id="locationStatus" class="file-status"></div>
+
+      <div id="autoMethodWrap" class="hidden">
+        <label class="field-label">Calculation method</label>
+        <select id="calcMethodSelect" class="setup-select">
+          <option value="mwl">Muslim World League</option>
+          <option value="isna">ISNA (North America)</option>
+          <option value="egypt">Egyptian General Authority</option>
+          <option value="karachi">University of Islamic Sciences, Karachi</option>
+          <option value="ummalqura">Umm al-Qura, Makkah</option>
+        </select>
+      </div>
     </div>
 
-    <div id="locationStatus" class="file-status"></div>
+    <div class="setup-step">
+      <div class="step-header"><span class="step-num">2</span><span class="step-title">Mosque name & logo</span></div>
+      <input type="text" id="mosqueNameInput" placeholder="e.g. Timrå Islamiska Center">
 
-    <div id="autoMethodWrap" class="hidden">
-      <label class="field-label">Calculation method</label>
-      <select id="calcMethodSelect" class="setup-select">
-        <option value="mwl">Muslim World League</option>
-        <option value="isna">ISNA (North America)</option>
-        <option value="egypt">Egyptian General Authority</option>
-        <option value="karachi">University of Islamic Sciences, Karachi</option>
-        <option value="ummalqura">Umm al-Qura, Makkah</option>
+      <label class="field-label">Mosque logo (optional)</label>
+      <p class="field-hint">Shown next to the mosque name instead of the default icon.</p>
+      <input type="file" id="logoInput" accept="image/*">
+      <div id="logoPreviewWrap" class="logo-preview-wrap hidden">
+        <img id="logoPreview" class="logo-preview" alt="Logo preview">
+        <button type="button" id="logoRemoveBtn" class="logo-remove-btn">Remove</button>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-header"><span class="step-num">3</span><span class="step-title">Donation details (optional)</span></div>
+      <p class="field-hint">Shown scrolling at the bottom of the display so visitors can support the mosque.</p>
+      <input type="text" id="swishInput" placeholder="Swish number (optional)">
+      <input type="text" id="accountInput" placeholder="Bank account number (optional)">
+    </div>
+
+    <div class="setup-step">
+      <div class="step-header"><span class="step-num">4</span><span class="step-title">Announcement (optional)</span></div>
+      <input type="text" id="announcementInput" placeholder="e.g. Jumu'ah khutbah starts 13:15 this Friday">
+    </div>
+
+    <div class="setup-step">
+      <div class="step-header"><span class="step-num">5</span><span class="step-title">Display language</span></div>
+      <p class="field-hint">Changes the labels shown on screen (Next Prayer, Ayah of the Day, etc.) for visitors — prayer names stay as-is in every language.</p>
+      <select id="languageSelect" class="setup-select">
+        <option value="en">English</option>
+        <option value="sv">Svenska (Swedish)</option>
+        <option value="ar">العربية (Arabic)</option>
+        <option value="tr">Türkçe (Turkish)</option>
+        <option value="so">Soomaali (Somali)</option>
+        <option value="ur">اردو (Urdu)</option>
       </select>
     </div>
 
-    <label class="field-label">2. Mosque name</label>
-    <input type="text" id="mosqueNameInput" placeholder="e.g. Timrå Islamiska Center">
-
-    <label class="field-label">Mosque logo (optional)</label>
-    <p class="field-hint">Shown next to the mosque name instead of the default icon.</p>
-    <input type="file" id="logoInput" accept="image/*">
-    <div id="logoPreviewWrap" class="logo-preview-wrap hidden">
-      <img id="logoPreview" class="logo-preview" alt="Logo preview">
-      <button type="button" id="logoRemoveBtn" class="logo-remove-btn">Remove</button>
+    <div class="setup-step">
+      <div class="step-header"><span class="step-num">6</span><span class="step-title">Outdoor weather card (optional)</span></div>
+      <p class="field-hint">Shows current outdoor temperature. Needs internet on the display device to update — no browser can read an indoor/room temperature, only real weather data from outside. Leave unset to skip this card.</p>
+      <select id="weatherCitySelect" class="setup-select">
+        <option value="">— No weather card —</option>
+      </select>
     </div>
 
-    <label class="field-label">3. Donation details (optional)</label>
-    <p class="field-hint">Shown scrolling at the bottom of the display so visitors can support the mosque.</p>
-    <input type="text" id="swishInput" placeholder="Swish number (optional)">
-    <input type="text" id="accountInput" placeholder="Bank account number (optional)">
-
-    <label class="field-label">4. Announcement (optional)</label>
-    <input type="text" id="announcementInput" placeholder="e.g. Jumu'ah khutbah starts 13:15 this Friday">
-
-    <label class="field-label">5. Display language</label>
-    <p class="field-hint">Changes the labels shown on screen (Next Prayer, Ayah of the Day, etc.) for visitors — prayer names stay as-is in every language.</p>
-    <select id="languageSelect" class="setup-select">
-      <option value="en">English</option>
-      <option value="sv">Svenska (Swedish)</option>
-      <option value="ar">العربية (Arabic)</option>
-      <option value="tr">Türkçe (Turkish)</option>
-      <option value="so">Soomaali (Somali)</option>
-      <option value="ur">اردو (Urdu)</option>
-    </select>
-
-    <label class="field-label">Outdoor weather card (optional)</label>
-    <p class="field-hint">Shows current outdoor temperature on the display. Needs internet on the display device to update — there's no way for a browser to read an indoor/room temperature, only real weather data from outside. Leave unset to skip this card.</p>
-    <select id="weatherCitySelect" class="setup-select">
-      <option value="">— No weather card —</option>
-    </select>
-
-    <label class="field-label">6. Display theme</label>
-    <select id="themeSelect" class="setup-select">
-      <option value="teal">Ocean Teal (default)</option>
-      <option value="night">Night / High Contrast (best for readability at a distance)</option>
-      <option value="green">Forest Green</option>
-      <option value="midnight">Royal Blue / Midnight</option>
-      <option value="light">Desert Light (bright rooms)</option>
-    </select>
+    <div class="setup-step">
+      <div class="step-header"><span class="step-num">7</span><span class="step-title">Display theme</span></div>
+      <select id="themeSelect" class="setup-select">
+        <option value="teal">Ocean Teal (default)</option>
+        <option value="night">Night / High Contrast (best for readability at a distance)</option>
+        <option value="green">Forest Green</option>
+        <option value="midnight">Royal Blue / Midnight</option>
+        <option value="light">Desert Light (bright rooms)</option>
+      </select>
+    </div>
 
     <button id="startBtn" class="start-btn" disabled>Start Display</button>
     <p id="setupError" class="setup-error"></p>
 
-    <div class="or-divider"><span>For mosques with no internet on the display itself</span></div>
-    <p class="field-hint">Download one self-contained file (works with an internet connection anywhere — a phone, a café — right now), then copy it to a USB drive and open it on the display device. No internet needed there ever again.</p>
-    <button type="button" id="downloadOfflineBtn" class="secondary-btn">⬇ Download Offline Version (.html)</button>
-    <div id="offlineStatus" class="file-status"></div>
+    <div class="setup-step setup-step-muted">
+      <div class="step-header"><span class="step-icon">📡</span><span class="step-title">No internet on the display itself?</span></div>
+      <p class="field-hint">Download one self-contained file (works with an internet connection anywhere — a phone, a café — right now), then copy it to a USB drive and open it on the display device. No internet needed there ever again.</p>
+      <button type="button" id="downloadOfflineBtn" class="secondary-btn">⬇ Download Offline Version (.html)</button>
+      <div id="offlineStatus" class="file-status"></div>
+    </div>
   </div>
 </div>
 
@@ -155,12 +170,12 @@
   </div>
 </div>
 
-<script src="hijri.js?v=24"></script>
-<script src="verses.js?v=24"></script>
-<script src="prayertimes.js?v=24"></script>
-<script src="translations.js?v=24"></script>
-<script src="themes.js?v=24"></script>
-<script src="cities.js?v=24"></script>
-<script src="app.js?v=24"></script>
+<script src="hijri.js?v=25"></script>
+<script src="verses.js?v=25"></script>
+<script src="prayertimes.js?v=25"></script>
+<script src="translations.js?v=25"></script>
+<script src="themes.js?v=25"></script>
+<script src="cities.js?v=25"></script>
+<script src="app.js?v=25"></script>
 </body>
 </html>
