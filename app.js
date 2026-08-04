@@ -759,7 +759,44 @@ downloadOfflineBtn.addEventListener('click', async () => {
 
 // ── Boot ────────────────────────────────────────────────────────────────
 
+const SHARED_FILE_KEY = 'hidaya_shared_file_v1';
+
+// A .hidaya file shared from WhatsApp (or any share sheet) via the
+// installed PWA's share-target (see sw.js) lands here as raw text —
+// dropped into localStorage by the service worker's response script,
+// picked up on the very next page load. Mirrors the phone app's
+// _importFromPath fullYear handling: only overwrites the mosque name if
+// one wasn't already configured, and keeps every other existing setting
+// (theme, language, donation info, weather) intact when re-sharing an
+// updated timetable.
+function tryLoadSharedFile() {
+  const raw = localStorage.getItem(SHARED_FILE_KEY);
+  if (!raw) return false;
+  localStorage.removeItem(SHARED_FILE_KEY);
+  try {
+    const json = JSON.parse(raw);
+    if (json.type !== 'fullYear' || !json.months) return false;
+    const existing = loadConfig() || {};
+    const config = {
+      ...existing,
+      mode: 'file',
+      timetable: json,
+      mosqueName: existing.mosqueName || json.mosque || '',
+      calcMethod: existing.calcMethod || 'mwl',
+      language: existing.language || 'en',
+      theme: existing.theme || 'teal',
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    startDisplay(config);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 (function boot() {
+  if (tryLoadSharedFile()) return;
+
   // A config baked into the URL (see "Generate Link for TV") takes
   // priority — this is exactly the TV's first-ever load of its one short
   // link. Once loaded, it's saved to localStorage same as manual setup,

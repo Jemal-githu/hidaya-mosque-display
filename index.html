@@ -7,7 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=27">
+<link rel="stylesheet" href="style.css?v=28">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00494f">
 </head>
 <body>
 
@@ -184,12 +186,21 @@
   </div>
 </div>
 
-<script src="hijri.js?v=27"></script>
-<script src="verses.js?v=27"></script>
-<script src="prayertimes.js?v=27"></script>
-<script src="translations.js?v=27"></script>
-<script src="themes.js?v=27"></script>
-<script src="cities.js?v=27"></script>
-<script src="app.js?v=27"></script>
+<script src="hijri.js?v=28"></script>
+<script src="verses.js?v=28"></script>
+<script src="prayertimes.js?v=28"></script>
+<script src="translations.js?v=28"></script>
+<script src="themes.js?v=28"></script>
+<script src="cities.js?v=28"></script>
+<script src="app.js?v=28"></script>
+<script>
+  // Registers the share-target service worker so this page can appear in
+  // Android's "Open with" / "Share" sheet for .hidaya files (e.g. shared
+  // from WhatsApp) once the user has installed it as a PWA ("Add to Home
+  // Screen"). Harmless no-op on browsers without service worker support.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
 </body>
 </html>
