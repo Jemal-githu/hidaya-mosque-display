@@ -519,6 +519,6 @@ body.mode-display {
 .brand-logo-text {
   font-family: 'Agressive', 'Anton', 'Poppins', 'Segoe UI', sans-serif;
   color: #ffffff;
-  letter-spacing: 1px;
+  letter-spacing: 0;
   font-size: clamp(11px, 1.5vmin, 16px);
 }
