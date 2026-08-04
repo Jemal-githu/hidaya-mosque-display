@@ -520,5 +520,5 @@ body.mode-display {
   font-family: 'Agressive', 'Anton', 'Poppins', 'Segoe UI', sans-serif;
   color: #ffffff;
   letter-spacing: 1px;
-  font-size: clamp(15px, 2.3vmin, 24px);
+  font-size: clamp(11px, 1.5vmin, 16px);
 }
