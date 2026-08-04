@@ -1,0 +1,70 @@
+// Offline city→coordinates lookup — no network/GPS needed. Weighted
+// toward Africa and other regions where mosques commonly lack reliable
+// internet on the display device itself, plus major world cities for
+// everywhere else. Coordinates are approximate city-center values, fine
+// for prayer-time calculation purposes.
+
+const CITIES = [
+  // Africa
+  { name: 'Lagos, Nigeria', lat: 6.5244, lng: 3.3792 },
+  { name: 'Kano, Nigeria', lat: 12.0022, lng: 8.5920 },
+  { name: 'Abuja, Nigeria', lat: 9.0765, lng: 7.3986 },
+  { name: 'Cairo, Egypt', lat: 30.0444, lng: 31.2357 },
+  { name: 'Alexandria, Egypt', lat: 31.2001, lng: 29.9187 },
+  { name: 'Khartoum, Sudan', lat: 15.5007, lng: 32.5599 },
+  { name: 'Omdurman, Sudan', lat: 15.6440, lng: 32.4772 },
+  { name: 'Nairobi, Kenya', lat: -1.2921, lng: 36.8219 },
+  { name: 'Mombasa, Kenya', lat: -4.0435, lng: 39.6682 },
+  { name: 'Dar es Salaam, Tanzania', lat: -6.7924, lng: 39.2083 },
+  { name: 'Zanzibar City, Tanzania', lat: -6.1659, lng: 39.2026 },
+  { name: 'Kampala, Uganda', lat: 0.3476, lng: 32.5825 },
+  { name: 'Addis Ababa, Ethiopia', lat: 9.0300, lng: 38.7400 },
+  { name: 'Mogadishu, Somalia', lat: 2.0469, lng: 45.3182 },
+  { name: 'Hargeisa, Somaliland', lat: 9.5624, lng: 44.0770 },
+  { name: 'Djibouti City, Djibouti', lat: 11.5721, lng: 43.1456 },
+  { name: 'Dakar, Senegal', lat: 14.7167, lng: -17.4677 },
+  { name: 'Bamako, Mali', lat: 12.6392, lng: -8.0029 },
+  { name: 'Ouagadougou, Burkina Faso', lat: 12.3714, lng: -1.5197 },
+  { name: 'Niamey, Niger', lat: 13.5137, lng: 2.1098 },
+  { name: "N'Djamena, Chad", lat: 12.1348, lng: 15.0557 },
+  { name: 'Accra, Ghana', lat: 5.6037, lng: -0.1870 },
+  { name: 'Kumasi, Ghana', lat: 6.6885, lng: -1.6244 },
+  { name: 'Abidjan, Ivory Coast', lat: 5.3600, lng: -4.0083 },
+  { name: 'Conakry, Guinea', lat: 9.6412, lng: -13.5784 },
+  { name: 'Freetown, Sierra Leone', lat: 8.4657, lng: -13.2317 },
+  { name: 'Monrovia, Liberia', lat: 6.3004, lng: -10.7969 },
+  { name: 'Casablanca, Morocco', lat: 33.5731, lng: -7.5898 },
+  { name: 'Rabat, Morocco', lat: 34.0209, lng: -6.8416 },
+  { name: 'Algiers, Algeria', lat: 36.7538, lng: 3.0588 },
+  { name: 'Tunis, Tunisia', lat: 36.8065, lng: 10.1815 },
+  { name: 'Tripoli, Libya', lat: 32.8872, lng: 13.1913 },
+  { name: 'Kinshasa, DR Congo', lat: -4.4419, lng: 15.2663 },
+  { name: 'Lubumbashi, DR Congo', lat: -11.6609, lng: 27.4794 },
+  { name: 'Luanda, Angola', lat: -8.8390, lng: 13.2894 },
+  { name: 'Lusaka, Zambia', lat: -15.3875, lng: 28.3228 },
+  { name: 'Harare, Zimbabwe', lat: -17.8252, lng: 31.0335 },
+  { name: 'Maputo, Mozambique', lat: -25.9692, lng: 32.5732 },
+  { name: 'Johannesburg, South Africa', lat: -26.2041, lng: 28.0473 },
+  { name: 'Cape Town, South Africa', lat: -33.9249, lng: 18.4241 },
+  { name: 'Durban, South Africa', lat: -29.8587, lng: 31.0218 },
+
+  // Middle East / South & Southeast Asia
+  { name: 'Makkah, Saudi Arabia', lat: 21.3891, lng: 39.8579 },
+  { name: 'Madinah, Saudi Arabia', lat: 24.5247, lng: 39.5692 },
+  { name: 'Riyadh, Saudi Arabia', lat: 24.7136, lng: 46.6753 },
+  { name: 'Istanbul, Turkey', lat: 41.0082, lng: 28.9784 },
+  { name: 'Karachi, Pakistan', lat: 24.8607, lng: 67.0011 },
+  { name: 'Lahore, Pakistan', lat: 31.5497, lng: 74.3436 },
+  { name: 'Dhaka, Bangladesh', lat: 23.8103, lng: 90.4125 },
+  { name: 'Jakarta, Indonesia', lat: -6.2088, lng: 106.8456 },
+  { name: 'Kuala Lumpur, Malaysia', lat: 3.1390, lng: 101.6869 },
+  { name: 'Dubai, UAE', lat: 25.2048, lng: 55.2708 },
+
+  // Europe / Americas (for diaspora mosques)
+  { name: 'London, UK', lat: 51.5074, lng: -0.1278 },
+  { name: 'Stockholm, Sweden', lat: 59.3293, lng: 18.0686 },
+  { name: 'Timrå, Sweden', lat: 62.4869, lng: 17.3272 },
+  { name: 'Paris, France', lat: 48.8566, lng: 2.3522 },
+  { name: 'New York, USA', lat: 40.7128, lng: -74.0060 },
+  { name: 'Toronto, Canada', lat: 43.6532, lng: -79.3832 },
+];

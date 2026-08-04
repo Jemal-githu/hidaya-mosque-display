@@ -136,6 +136,26 @@ body.mode-display {
 }
 .secondary-btn:hover { background: rgba(255, 255, 255, 0.12); }
 
+.coord-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.coord-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  font-size: 14px;
+}
+.coord-row .secondary-btn {
+  width: auto;
+  flex: 0 0 auto;
+}
+
 .file-status {
   margin-top: 8px;
   font-size: 13px;

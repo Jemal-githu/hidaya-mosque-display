@@ -39,6 +39,13 @@ const locationStatus = document.getElementById('locationStatus');
 const autoMethodWrap = document.getElementById('autoMethodWrap');
 const calcMethodSelect = document.getElementById('calcMethodSelect');
 const languageSelect = document.getElementById('languageSelect');
+const citySelect = document.getElementById('citySelect');
+const manualLatInput = document.getElementById('manualLatInput');
+const manualLngInput = document.getElementById('manualLngInput');
+const manualCoordBtn = document.getElementById('manualCoordBtn');
+const themeSelect = document.getElementById('themeSelect');
+const downloadOfflineBtn = document.getElementById('downloadOfflineBtn');
+const offlineStatus = document.getElementById('offlineStatus');
 
 let parsedTimetable = null; // { months: { '1': { '1': {Fajr:..,...}, ... }, ... } }
 let logoDataUrl = null; // small resized data: URL, or null for the default mosque icon
@@ -75,6 +82,49 @@ useLocationBtn.addEventListener('click', () => {
     { enableHighAccuracy: false, timeout: 15000 }
   );
 });
+
+// City picker and manual coordinates — work with zero internet/GPS on the
+// display device itself, for mosques (common across Africa and other
+// low-connectivity regions) where the TV/screen never has a connection.
+// CITIES is defined in cities.js.
+for (const city of CITIES) {
+  const opt = document.createElement('option');
+  opt.value = `${city.lat},${city.lng}`;
+  opt.textContent = city.name;
+  citySelect.appendChild(opt);
+}
+
+citySelect.addEventListener('change', () => {
+  if (!citySelect.value) return;
+  const [lat, lng] = citySelect.value.split(',').map(Number);
+  autoLocation = { lat, lng };
+  sourceMode = 'auto';
+  locationStatus.textContent = `Using ${citySelect.options[citySelect.selectedIndex].text} coordinates — no GPS/internet needed on this screen.`;
+  locationStatus.className = 'file-status ok';
+  autoMethodWrap.classList.remove('hidden');
+  updateStartButton();
+});
+
+manualCoordBtn.addEventListener('click', () => {
+  const lat = parseFloat(manualLatInput.value);
+  const lng = parseFloat(manualLngInput.value);
+  if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    locationStatus.textContent = 'Enter valid latitude (-90 to 90) and longitude (-180 to 180).';
+    locationStatus.className = 'file-status err';
+    return;
+  }
+  autoLocation = { lat, lng };
+  sourceMode = 'auto';
+  citySelect.value = '';
+  locationStatus.textContent = `Using coordinates ${lat}, ${lng}.`;
+  locationStatus.className = 'file-status ok';
+  autoMethodWrap.classList.remove('hidden');
+  updateStartButton();
+});
+
+// Live theme preview while setting up, matching whatever will actually be
+// used once the display starts.
+themeSelect.addEventListener('change', () => applyTheme(themeSelect.value));
 
 // Resizes/re-encodes the uploaded image down to a small square so it fits
 // comfortably in localStorage (a raw phone photo can be several MB, which
@@ -176,6 +226,7 @@ startBtn.addEventListener('click', () => {
     autoLocation: sourceMode === 'auto' ? autoLocation : null,
     calcMethod: calcMethodSelect.value,
     language: languageSelect.value,
+    theme: themeSelect.value,
     mosqueName: mosqueNameInput.value.trim(),
     swish: swishInput.value.trim(),
     account: accountInput.value.trim(),
@@ -210,6 +261,8 @@ settingsBtn.addEventListener('click', () => {
     showLogoPreview(logoDataUrl);
     calcMethodSelect.value = saved.calcMethod || 'mwl';
     languageSelect.value = saved.language || 'en';
+    themeSelect.value = saved.theme || 'teal';
+    applyTheme(themeSelect.value);
     sourceMode = saved.mode || (saved.timetable ? 'file' : null);
 
     if (sourceMode === 'auto' && saved.autoLocation) {
@@ -266,6 +319,8 @@ function startDisplay(config) {
   setupView.classList.add('hidden');
   displayView.classList.remove('hidden');
   document.body.classList.add('mode-display');
+
+  applyTheme(config.theme || 'teal');
 
   document.getElementById('mosqueNameOut').textContent = config.mosqueName || 'Hidaya AI';
 
@@ -468,6 +523,80 @@ function tickClock(config) {
     `;
   }
 }
+
+// ── Offline single-file export ───────────────────────────────────────────
+// For mosques where the DISPLAY DEVICE itself never has internet (common
+// across Africa and other low-connectivity regions): builds one
+// self-contained .html file with all CSS/JS/fonts inlined, downloadable
+// from anywhere that DOES have internet right now (a phone, a café). The
+// resulting file can be copied to a USB drive and opened directly on the
+// display device — no server, no network calls, ever, from that point on.
+
+function arrayBufferToBase64(buf) {
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+async function buildOfflineHtml() {
+  const [htmlText, css, appJs, hijriJs, versesJs, prayertimesJs, translationsJs, themesJs, citiesJs, fontBuf] = await Promise.all([
+    fetch('index.html').then((r) => r.text()),
+    fetch('style.css').then((r) => r.text()),
+    fetch('app.js').then((r) => r.text()),
+    fetch('hijri.js').then((r) => r.text()),
+    fetch('verses.js').then((r) => r.text()),
+    fetch('prayertimes.js').then((r) => r.text()),
+    fetch('translations.js').then((r) => r.text()),
+    fetch('themes.js').then((r) => r.text()),
+    fetch('cities.js').then((r) => r.text()),
+    fetch('agressive.otf').then((r) => r.arrayBuffer()),
+  ]);
+
+  const fontBase64 = arrayBufferToBase64(fontBuf);
+  const cssInlined = css.replace(
+    "url('agressive.otf') format('opentype')",
+    `url('data:font/otf;base64,${fontBase64}') format('opentype')`
+  );
+
+  let html = htmlText;
+  // Strip the Google Fonts links — no network calls allowed in the offline
+  // file; the Agressive font is embedded above, everything else already
+  // has a system-font fallback in the CSS font stacks.
+  html = html.replace(/<link rel="preconnect"[^>]*>\s*/g, '');
+  html = html.replace(/<link href="https:\/\/fonts\.googleapis\.com[^>]*>\s*/g, '');
+  html = html.replace(/<link rel="stylesheet" href="style\.css[^"]*">/, `<style>${cssInlined}</style>`);
+  html = html.replace(/<script src="hijri\.js[^"]*"><\/script>/, `<script>${hijriJs}</script>`);
+  html = html.replace(/<script src="verses\.js[^"]*"><\/script>/, `<script>${versesJs}</script>`);
+  html = html.replace(/<script src="prayertimes\.js[^"]*"><\/script>/, `<script>${prayertimesJs}</script>`);
+  html = html.replace(/<script src="translations\.js[^"]*"><\/script>/, `<script>${translationsJs}</script>`);
+  html = html.replace(/<script src="themes\.js[^"]*"><\/script>/, `<script>${themesJs}</script>`);
+  html = html.replace(/<script src="cities\.js[^"]*"><\/script>/, `<script>${citiesJs}</script>`);
+  html = html.replace(/<script src="app\.js[^"]*"><\/script>/, `<script>${appJs}</script>`);
+  return html;
+}
+
+downloadOfflineBtn.addEventListener('click', async () => {
+  offlineStatus.textContent = 'Building offline file…';
+  offlineStatus.className = 'file-status';
+  try {
+    const html = await buildOfflineHtml();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hidaya-mosque-display-offline.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    offlineStatus.textContent = 'Downloaded! Copy this file to a USB drive and open it on the display device — no internet needed there, ever again.';
+    offlineStatus.className = 'file-status ok';
+  } catch (e) {
+    offlineStatus.textContent = 'Could not build the offline file — this download itself needs an internet connection right now.';
+    offlineStatus.className = 'file-status err';
+  }
+});
 
 // ── Boot ────────────────────────────────────────────────────────────────
 

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
 
@@ -24,8 +24,22 @@
 
     <div class="or-divider"><span>OR — no timetable file?</span></div>
 
-    <p class="field-hint">Calculate prayer times automatically from this screen's location. Best when a mosque hasn't shared a printed timetable — a mosque's own timetable (above) should still be preferred when available, since local committee conventions can differ slightly from pure calculation.</p>
-    <button type="button" id="useLocationBtn" class="secondary-btn">📍 Use This Screen's Location</button>
+    <p class="field-hint">Calculate prayer times automatically instead. Best when a mosque hasn't shared a printed timetable — a mosque's own timetable (above) should still be preferred when available, since local committee conventions can differ slightly from pure calculation.</p>
+
+    <button type="button" id="useLocationBtn" class="secondary-btn">📍 Use This Screen's GPS Location</button>
+
+    <label class="field-label">No internet/GPS on this screen? Pick a nearby city instead</label>
+    <select id="citySelect" class="setup-select">
+      <option value="">— Select a city —</option>
+    </select>
+
+    <label class="field-label">Or enter exact coordinates manually</label>
+    <div class="coord-row">
+      <input type="text" id="manualLatInput" placeholder="Latitude e.g. 6.5244">
+      <input type="text" id="manualLngInput" placeholder="Longitude e.g. 3.3792">
+      <button type="button" id="manualCoordBtn" class="secondary-btn">Use</button>
+    </div>
+
     <div id="locationStatus" class="file-status"></div>
 
     <div id="autoMethodWrap" class="hidden">
@@ -69,8 +83,22 @@
       <option value="ur">اردو (Urdu)</option>
     </select>
 
+    <label class="field-label">6. Display theme</label>
+    <select id="themeSelect" class="setup-select">
+      <option value="teal">Ocean Teal (default)</option>
+      <option value="night">Night / High Contrast (best for readability at a distance)</option>
+      <option value="green">Forest Green</option>
+      <option value="midnight">Royal Blue / Midnight</option>
+      <option value="light">Desert Light (bright rooms)</option>
+    </select>
+
     <button id="startBtn" class="start-btn" disabled>Start Display</button>
     <p id="setupError" class="setup-error"></p>
+
+    <div class="or-divider"><span>For mosques with no internet on the display itself</span></div>
+    <p class="field-hint">Download one self-contained file (works with an internet connection anywhere — a phone, a café — right now), then copy it to a USB drive and open it on the display device. No internet needed there ever again.</p>
+    <button type="button" id="downloadOfflineBtn" class="secondary-btn">⬇ Download Offline Version (.html)</button>
+    <div id="offlineStatus" class="file-status"></div>
   </div>
 </div>
 
@@ -115,10 +143,12 @@
   </div>
 </div>
 
-<script src="hijri.js?v=21"></script>
-<script src="verses.js?v=21"></script>
-<script src="prayertimes.js?v=21"></script>
-<script src="translations.js?v=21"></script>
-<script src="app.js?v=21"></script>
+<script src="hijri.js?v=22"></script>
+<script src="verses.js?v=22"></script>
+<script src="prayertimes.js?v=22"></script>
+<script src="translations.js?v=22"></script>
+<script src="themes.js?v=22"></script>
+<script src="cities.js?v=22"></script>
+<script src="app.js?v=22"></script>
 </body>
 </html>
