@@ -40,6 +40,7 @@ const autoMethodWrap = document.getElementById('autoMethodWrap');
 const calcMethodSelect = document.getElementById('calcMethodSelect');
 const languageSelect = document.getElementById('languageSelect');
 const citySelect = document.getElementById('citySelect');
+const weatherCitySelect = document.getElementById('weatherCitySelect');
 const manualLatInput = document.getElementById('manualLatInput');
 const manualLngInput = document.getElementById('manualLngInput');
 const manualCoordBtn = document.getElementById('manualCoordBtn');
@@ -87,12 +88,16 @@ useLocationBtn.addEventListener('click', () => {
 // display device itself, for mosques (common across Africa and other
 // low-connectivity regions) where the TV/screen never has a connection.
 // CITIES is defined in cities.js.
-for (const city of CITIES) {
-  const opt = document.createElement('option');
-  opt.value = `${city.lat},${city.lng}`;
-  opt.textContent = city.name;
-  citySelect.appendChild(opt);
+function populateCityOptions(selectEl) {
+  for (const city of CITIES) {
+    const opt = document.createElement('option');
+    opt.value = `${city.lat},${city.lng}`;
+    opt.textContent = city.name;
+    selectEl.appendChild(opt);
+  }
 }
+populateCityOptions(citySelect);
+populateCityOptions(weatherCitySelect);
 
 citySelect.addEventListener('change', () => {
   if (!citySelect.value) return;
@@ -227,6 +232,9 @@ startBtn.addEventListener('click', () => {
     calcMethod: calcMethodSelect.value,
     language: languageSelect.value,
     theme: themeSelect.value,
+    weatherCity: weatherCitySelect.value
+        ? { lat: parseFloat(weatherCitySelect.value.split(',')[0]), lng: parseFloat(weatherCitySelect.value.split(',')[1]) }
+        : null,
     mosqueName: mosqueNameInput.value.trim(),
     swish: swishInput.value.trim(),
     account: accountInput.value.trim(),
@@ -263,6 +271,7 @@ settingsBtn.addEventListener('click', () => {
     languageSelect.value = saved.language || 'en';
     themeSelect.value = saved.theme || 'teal';
     applyTheme(themeSelect.value);
+    weatherCitySelect.value = saved.weatherCity ? `${saved.weatherCity.lat},${saved.weatherCity.lng}` : '';
     sourceMode = saved.mode || (saved.timetable ? 'file' : null);
 
     if (sourceMode === 'auto' && saved.autoLocation) {
@@ -294,14 +303,17 @@ function loadConfig() {
 let clockTimer = null;
 let verseTimer = null;
 let tickerCancel = null; // cancels the ticker's requestAnimationFrame loop
+let weatherTimer = null;
 
 function stopClocks() {
   if (clockTimer) clearInterval(clockTimer);
   if (verseTimer) clearInterval(verseTimer);
   if (tickerCancel) tickerCancel();
+  if (weatherTimer) clearInterval(weatherTimer);
   clockTimer = null;
   verseTimer = null;
   tickerCancel = null;
+  weatherTimer = null;
 }
 
 function timesForDate(config, date) {
@@ -367,6 +379,49 @@ function startDisplay(config) {
     verseIndex = (verseIndex + 1) % DISPLAY_VERSES.length;
     showVerse(verseIndex);
   }, 25000);
+
+  // Weather card is fully optional — only shown if a location was chosen
+  // for it (falls back to the auto-calculated prayer location when that's
+  // in use), and silently hidden if the fetch fails (offline display, or
+  // no location configured at all) rather than showing an error.
+  const weatherLoc = config.weatherCity || (config.mode === 'auto' ? config.autoLocation : null);
+  if (weatherLoc) {
+    fetchWeather(weatherLoc);
+    weatherTimer = setInterval(() => fetchWeather(weatherLoc), 15 * 60 * 1000);
+  } else {
+    document.getElementById('weatherCard').classList.add('hidden');
+  }
+}
+
+// WMO weather codes (used by Open-Meteo) mapped to a simple icon + label.
+const WEATHER_CODES = {
+  0: ['☀️', 'Clear sky'], 1: ['🌤️', 'Mostly clear'], 2: ['⛅', 'Partly cloudy'], 3: ['☁️', 'Overcast'],
+  45: ['🌫️', 'Fog'], 48: ['🌫️', 'Fog'],
+  51: ['🌦️', 'Light drizzle'], 53: ['🌦️', 'Drizzle'], 55: ['🌧️', 'Heavy drizzle'],
+  61: ['🌧️', 'Light rain'], 63: ['🌧️', 'Rain'], 65: ['🌧️', 'Heavy rain'],
+  71: ['🌨️', 'Light snow'], 73: ['🌨️', 'Snow'], 75: ['❄️', 'Heavy snow'],
+  80: ['🌦️', 'Rain showers'], 81: ['🌧️', 'Rain showers'], 82: ['⛈️', 'Violent showers'],
+  95: ['⛈️', 'Thunderstorm'], 96: ['⛈️', 'Thunderstorm'], 99: ['⛈️', 'Thunderstorm'],
+};
+
+function fetchWeather(loc) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lng}&current_weather=true`;
+  fetch(url)
+      .then((r) => r.json())
+      .then((data) => {
+        const cw = data.current_weather;
+        if (!cw) throw new Error('no current_weather in response');
+        const [icon, label] = WEATHER_CODES[cw.weathercode] || ['🌡️', ''];
+        document.getElementById('weatherIconOut').textContent = icon;
+        document.getElementById('weatherTempOut').textContent = `${Math.round(cw.temperature)}°C`;
+        document.getElementById('weatherDescOut').textContent = label;
+        document.getElementById('weatherCard').classList.remove('hidden');
+      })
+      .catch(() => {
+        // Offline, or the weather API is unreachable — hide rather than
+        // show stale/broken data.
+        document.getElementById('weatherCard').classList.add('hidden');
+      });
 }
 
 // One continuously-scrolling ticker line (classic marquee) that loops
