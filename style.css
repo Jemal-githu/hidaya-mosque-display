@@ -491,8 +491,7 @@ body.mode-display {
 }
 
 /* Small static footer card — no scrolling/animation, sits under the
-   ticker as its own separate line. Uses the real Hidaya AI logo image
-   instead of styled text. */
+   ticker as its own separate line. */
 .brand-footer {
   width: 100%;
   max-width: 900px;
@@ -508,7 +507,10 @@ body.mode-display {
   .brand-footer { max-width: 1500px; }
 }
 
-.brand-logo-img {
-  height: clamp(14px, 2.4vmin, 24px);
-  width: auto;
+.brand-logo-text {
+  font-family: 'Anton', 'Poppins', 'Segoe UI', sans-serif;
+  font-weight: 400; /* Anton is a single-weight display face, already very heavy */
+  color: #ffffff;
+  letter-spacing: 1.5px;
+  font-size: clamp(13px, 2vmin, 20px);
 }
