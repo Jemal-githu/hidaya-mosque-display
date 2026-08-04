@@ -283,10 +283,12 @@ function startDisplay(config) {
   const lang = config.language || 'en';
   document.getElementById('verseLabelOut').textContent = t(lang, 'ayahOfDay');
 
-  // Build the rotating ticker messages — one sentence scrolls fully across
-  // at a time before the next appears. Swish + bank account are combined
-  // into ONE sentence (rather than two separate messages) since they're
-  // both "how to donate" info that reads naturally together.
+  // Build one continuously-scrolling ticker line — all sentences joined
+  // with a wide gap (50 non-breaking spaces, which — unlike regular
+  // spaces — don't get collapsed by the browser) so it reads as one
+  // unbroken scroll rather than stopping/restarting between sentences.
+  // The Hidaya AI branding is NOT part of this — it has its own small
+  // static card below instead (see the brand-footer element).
   const tickerParts = [];
   if (config.announcement) tickerParts.push(config.announcement);
   if (config.swish || config.account) {
@@ -295,8 +297,10 @@ function startDisplay(config) {
     if (config.account) donateBits.push(`🏦 ${t(lang, 'bankAccount')}: ${config.account}`);
     tickerParts.push(donateBits.join(' — '));
   }
-  tickerParts.push(`BRAND:${t(lang, 'poweredBy')}`);
-  startTicker(tickerParts);
+  const GAP = ' '.repeat(50);
+  startTicker(tickerParts.length ? tickerParts.join(GAP) : `🕌 ${config.mosqueName || 'Hidaya AI'}`);
+
+  document.getElementById('brandPrefixOut').textContent = t(lang, 'poweredBy');
 
   renderPrayerRow(config);
   tickClock(config);
@@ -310,57 +314,44 @@ function startDisplay(config) {
   }, 25000);
 }
 
-// Shows the ticker messages one at a time, each scrolling continuously
-// right-to-left across the full bar (like a classic marquee) rather than
-// one long line with every message joined together — so only one
-// sentence is ever moving/visible at once, but the motion itself stays
-// continuous. Driven by requestAnimationFrame with a plain inline
-// `transform` rather than a CSS @keyframes animation — a CSS animation
-// whose keyframes reference custom properties (needed here since the
-// scroll distance depends on each message's own text width) failed to
-// actually start in testing (getAnimations() came back empty even
-// though computed style reported it as "running"), and a manual rAF
-// loop sidesteps that entirely while also being about as universally
-// supported as anything gets across embedded/TV browsers.
-function startTicker(messages) {
+// One continuously-scrolling ticker line (classic marquee) that loops
+// forever — `text` already has all sentences joined with a wide gap
+// (see the caller in startDisplay), so this doesn't need to know about
+// separate messages at all, it just scrolls the whole string right-to-
+// left and restarts from the right the moment it scrolls fully off.
+// Driven by requestAnimationFrame with a plain inline `transform` rather
+// than a CSS @keyframes animation — a CSS animation whose keyframes
+// reference custom properties (needed since the scroll distance depends
+// on the text's own width) failed to actually start in testing
+// (getAnimations() came back empty even though computed style reported
+// it as "running"), and a manual rAF loop sidesteps that entirely while
+// also being about as universally supported as anything gets across
+// embedded/TV browsers.
+function startTicker(text) {
   const tickerEl = document.getElementById('tickerOut');
   const barEl = tickerEl.parentElement;
-  let index = 0;
   const SPEED_PX_PER_SEC = 140;
   let rafId = null;
 
-  function playNext() {
-    const msg = messages[index];
-    index = (index + 1) % messages.length;
+  tickerEl.textContent = text;
+  const startX = barEl.clientWidth;
+  const endX = -tickerEl.scrollWidth;
+  const distance = startX - endX;
+  const durationMs = (distance / SPEED_PX_PER_SEC) * 1000;
 
-    if (msg.startsWith('BRAND:')) {
-      tickerEl.innerHTML = `<span class="brand-line">${msg.slice(6)} <span class="brand-logo-text"><span class="brand-hidaya">HIDAYA</span> <span class="brand-ai">AI</span></span></span>`;
-    } else {
-      tickerEl.textContent = msg;
-    }
-
-    const startX = barEl.clientWidth;
-    const endX = -tickerEl.scrollWidth;
-    const distance = startX - endX;
-    const durationMs = (distance / SPEED_PX_PER_SEC) * 1000;
-    const startTime = performance.now();
-
+  function loop(loopStartTime) {
     function step(now) {
-      const elapsed = now - startTime;
-      const progress = Math.min(1, elapsed / durationMs);
+      const elapsed = now - loopStartTime;
+      const progress = (elapsed % durationMs) / durationMs;
       const x = startX - progress * distance;
       tickerEl.style.transform = `translate(${x}px, -50%)`;
-      if (progress < 1) {
-        rafId = requestAnimationFrame(step);
-      } else {
-        playNext();
-      }
+      rafId = requestAnimationFrame(step);
     }
     rafId = requestAnimationFrame(step);
   }
 
   tickerCancel = () => { if (rafId) cancelAnimationFrame(rafId); };
-  playNext();
+  loop(performance.now());
 }
 
 function showVerse(index) {

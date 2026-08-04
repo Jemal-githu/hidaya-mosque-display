@@ -497,3 +497,17 @@ body.mode-display {
 }
 .brand-hidaya { color: var(--text); }
 .brand-ai { color: var(--accent); }
+
+/* Small static footer card — no scrolling/animation, sits under the
+   ticker as its own separate line. */
+.brand-footer {
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+  padding: 0.8vh 0;
+  font-size: clamp(11px, 1.6vmin, 16px);
+  color: var(--text-muted);
+}
+@media (orientation: landscape) and (min-width: 900px) {
+  .brand-footer { max-width: 1500px; }
+}
