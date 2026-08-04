@@ -303,7 +303,13 @@ body.mode-display {
      doesn't fit visually overlaps the ticker bar below instead of just
      scrolling. On a normal TV screen this never engages. */
   overflow-y: auto;
+  /* Keep the scroll SAFETY NET functional, but never show its scrollbar
+     on a real TV/kiosk display — it would just look like a stray UI
+     element visitors have no way to interact with anyway. */
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* old Edge */
 }
+.content-col::-webkit-scrollbar { display: none; } /* Chrome/Safari/Edge */
 
 /* On wide/landscape screens, use the extra horizontal room instead of
    leaving it empty either side of a narrow centered column: the next-
