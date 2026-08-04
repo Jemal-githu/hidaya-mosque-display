@@ -200,6 +200,37 @@ body.mode-display {
   flex: 0 0 auto;
 }
 
+.tv-link-result {
+  margin-top: 12px;
+  text-align: center;
+}
+.tv-qr {
+  width: 160px;
+  height: 160px;
+  border-radius: 10px;
+  background: #fff;
+  padding: 8px;
+  display: block;
+  margin: 0 auto 10px;
+}
+.tv-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.tv-link-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--accent);
+  font-size: 13px;
+  text-align: left;
+}
+
 .file-status {
   margin-top: 8px;
   font-size: 13px;
@@ -274,7 +305,12 @@ body.mode-display {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 3vh 3vw 0;
+  /* Bottom padding (not 0) is deliberate: many real TVs overscan/crop a
+     margin around the browser viewport, so content flush against the
+     very edge (the ticker/brand footer, in testing) gets visually cut
+     off by the TV's own bezel/panel even though it renders fine in a
+     desktop browser. */
+  padding: 3vh 3vw 2.5vh;
   position: relative;
 }
 
@@ -329,10 +365,10 @@ body.mode-display {
     row-gap: 1.6vh;
   }
   .top-bar { grid-column: 1 / -1; }
-  .weather-card { grid-column: 1 / -1; grid-row: 2; }
-  .next-card { grid-column: 1; grid-row: 3; }
-  .list-card { grid-column: 1; grid-row: 4; }
-  .verse-card { grid-column: 2; grid-row: 3 / span 2; }
+  .next-card { grid-column: 1; grid-row: 2; }
+  .weather-card { grid-column: 2; grid-row: 2; margin-bottom: 0; align-self: center; }
+  .list-card { grid-column: 1; grid-row: 3; }
+  .verse-card { grid-column: 2; grid-row: 3; }
 }
 
 /* Top bar: mosque name + Hijri date (left) / big animated clock + Gregorian date (right) */

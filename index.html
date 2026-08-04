@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
 
@@ -115,6 +115,20 @@
     <p id="setupError" class="setup-error"></p>
 
     <div class="setup-step setup-step-muted">
+      <div class="step-header"><span class="step-icon">📺</span><span class="step-title">Setting this up ON the TV is hard?</span></div>
+      <p class="field-hint">Fill in everything above right here on this phone/computer — much easier than a TV remote (camera for the file, working GPS, a real keyboard). Then get one short link that only needs to be typed ONCE on the TV's browser — it loads this entire setup automatically.</p>
+      <button type="button" id="generateLinkBtn" class="secondary-btn">🔗 Generate Link for TV</button>
+      <div id="tvLinkStatus" class="file-status"></div>
+      <div id="tvLinkResult" class="tv-link-result hidden">
+        <img id="qrImg" alt="QR code for TV link" class="tv-qr">
+        <div class="tv-link-row">
+          <span id="tvLinkOut" class="tv-link-text"></span>
+          <button type="button" id="copyTvLinkBtn" class="logo-remove-btn">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-step setup-step-muted">
       <div class="step-header"><span class="step-icon">📡</span><span class="step-title">No internet on the display itself?</span></div>
       <p class="field-hint">Download one self-contained file (works with an internet connection anywhere — a phone, a café — right now), then copy it to a USB drive and open it on the display device. No internet needed there ever again.</p>
       <button type="button" id="downloadOfflineBtn" class="secondary-btn">⬇ Download Offline Version (.html)</button>
@@ -170,12 +184,12 @@
   </div>
 </div>
 
-<script src="hijri.js?v=26"></script>
-<script src="verses.js?v=26"></script>
-<script src="prayertimes.js?v=26"></script>
-<script src="translations.js?v=26"></script>
-<script src="themes.js?v=26"></script>
-<script src="cities.js?v=26"></script>
-<script src="app.js?v=26"></script>
+<script src="hijri.js?v=27"></script>
+<script src="verses.js?v=27"></script>
+<script src="prayertimes.js?v=27"></script>
+<script src="translations.js?v=27"></script>
+<script src="themes.js?v=27"></script>
+<script src="cities.js?v=27"></script>
+<script src="app.js?v=27"></script>
 </body>
 </html>

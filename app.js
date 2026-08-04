@@ -47,6 +47,12 @@ const manualCoordBtn = document.getElementById('manualCoordBtn');
 const themeSelect = document.getElementById('themeSelect');
 const downloadOfflineBtn = document.getElementById('downloadOfflineBtn');
 const offlineStatus = document.getElementById('offlineStatus');
+const generateLinkBtn = document.getElementById('generateLinkBtn');
+const tvLinkStatus = document.getElementById('tvLinkStatus');
+const tvLinkResult = document.getElementById('tvLinkResult');
+const tvLinkOut = document.getElementById('tvLinkOut');
+const copyTvLinkBtn = document.getElementById('copyTvLinkBtn');
+const qrImg = document.getElementById('qrImg');
 
 let parsedTimetable = null; // { months: { '1': { '1': {Fajr:..,...}, ... }, ... } }
 let logoDataUrl = null; // small resized data: URL, or null for the default mosque icon
@@ -222,10 +228,12 @@ function updateStartButton() {
 }
 mosqueNameInput.addEventListener('input', updateStartButton);
 
-startBtn.addEventListener('click', () => {
-  const hasSource = (sourceMode === 'file' && parsedTimetable) || (sourceMode === 'auto' && autoLocation);
-  if (!hasSource) return;
-  const config = {
+function hasValidSource() {
+  return (sourceMode === 'file' && parsedTimetable) || (sourceMode === 'auto' && autoLocation);
+}
+
+function buildConfigFromForm() {
+  return {
     mode: sourceMode,
     timetable: sourceMode === 'file' ? parsedTimetable : null,
     autoLocation: sourceMode === 'auto' ? autoLocation : null,
@@ -241,6 +249,11 @@ startBtn.addEventListener('click', () => {
     announcement: announcementInput.value.trim(),
     logo: logoDataUrl,
   };
+}
+
+startBtn.addEventListener('click', () => {
+  if (!hasValidSource()) return;
+  const config = buildConfigFromForm();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
   } catch (e) {
@@ -579,6 +592,97 @@ function tickClock(config) {
   }
 }
 
+// ── "Generate Link for TV" ───────────────────────────────────────────────
+// Filling in the setup form is easy on a phone (camera for the timetable
+// file, working GPS, a real keyboard) and painful on a TV remote — Jemal
+// hit repeated 404s just trying to TYPE the plain page URL on a TV. The
+// fix: fill the form here, encode the whole config into the URL itself,
+// shorten that URL, and only that short link ever needs to be entered on
+// the TV — opening it auto-fills and starts the display immediately, no
+// TV-side interaction beyond typing one short address (or scanning the QR
+// with any camera-equipped device that can then relay/type it).
+
+function bytesToBase64(bytes) {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+function base64ToBytes(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+// URL-safe base64 (- _ instead of + /, no padding) so it survives being
+// pasted/typed as a URL query value without extra encoding headaches.
+function encodeConfigForLink(config) {
+  const trimmed = { ...config };
+  delete trimmed.logo; // logos are per-device customization, not worth the URL bloat/risk
+  const json = JSON.stringify(trimmed);
+  const bytes = new TextEncoder().encode(json);
+  return bytesToBase64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodeConfigFromLink(str) {
+  let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  const bytes = base64ToBytes(b64);
+  const json = new TextDecoder().decode(bytes);
+  return JSON.parse(json);
+}
+
+async function shortenUrl(longUrl) {
+  try {
+    const res = await fetch(`https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`);
+    const text = await res.text();
+    if (text.startsWith('https://is.gd/')) return text.trim();
+  } catch (e) { /* offline, or the shortener is unreachable — fall back below */ }
+  return null;
+}
+
+generateLinkBtn.addEventListener('click', async () => {
+  if (!hasValidSource() || !mosqueNameInput.value.trim()) {
+    tvLinkStatus.textContent = 'Fill in prayer times and mosque name first.';
+    tvLinkStatus.className = 'file-status err';
+    return;
+  }
+  tvLinkStatus.textContent = 'Generating link…';
+  tvLinkStatus.className = 'file-status';
+  tvLinkResult.classList.add('hidden');
+
+  const config = buildConfigFromForm();
+  const encoded = encodeConfigForLink(config);
+  const longUrl = `${location.origin}${location.pathname}?c=${encoded}`;
+
+  if (encoded.length > 1800) {
+    tvLinkStatus.textContent = 'This setup is too large for a link (a full-year timetable file is a lot of data) — use "Download Offline Version" below instead, or switch to automatic/city-based prayer times for a link this short can carry.';
+    tvLinkStatus.className = 'file-status err';
+    return;
+  }
+
+  const short = await shortenUrl(longUrl);
+  const finalUrl = short || longUrl;
+
+  tvLinkOut.textContent = finalUrl;
+  qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(finalUrl)}`;
+  tvLinkResult.classList.remove('hidden');
+  tvLinkStatus.textContent = short
+      ? 'Type this short link on the TV\'s browser — everything above will load automatically.'
+      : 'Could not shorten the link (no internet right now?) — this longer link still works the same way.';
+  tvLinkStatus.className = 'file-status ok';
+});
+
+copyTvLinkBtn.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(tvLinkOut.textContent);
+  tvLinkStatus.textContent = 'Copied!';
+  tvLinkStatus.className = 'file-status ok';
+});
+
 // ── Offline single-file export ───────────────────────────────────────────
 // For mosques where the DISPLAY DEVICE itself never has internet (common
 // across Africa and other low-connectivity regions): builds one
@@ -656,6 +760,23 @@ downloadOfflineBtn.addEventListener('click', async () => {
 // ── Boot ────────────────────────────────────────────────────────────────
 
 (function boot() {
+  // A config baked into the URL (see "Generate Link for TV") takes
+  // priority — this is exactly the TV's first-ever load of its one short
+  // link. Once loaded, it's saved to localStorage same as manual setup,
+  // so the TV never needs the query param again after a refresh/restart.
+  const urlConfig = new URLSearchParams(location.search).get('c');
+  if (urlConfig) {
+    try {
+      const config = decodeConfigFromLink(urlConfig);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      startDisplay(config);
+      return;
+    } catch (e) {
+      // Corrupted/truncated link — fall through to normal boot instead of
+      // leaving the screen stuck on an error.
+    }
+  }
+
   const saved = loadConfig();
   if (saved && (saved.timetable || (saved.mode === 'auto' && saved.autoLocation))) {
     startDisplay(saved);
