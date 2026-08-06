@@ -355,18 +355,20 @@ body.mode-display {
     max-width: 1500px;
     display: grid;
     grid-template-columns: 1.1fr 1fr;
-    /* All rows auto-sized to their own content — NOT 1fr, which was
-       stretching next-card/verse-card to fill leftover vertical space
-       far beyond what their text actually needed. Any true leftover
-       space now just stays empty background instead of inflating the
-       cards. */
-    align-items: start;
+    /* Rows are auto-sized to their TALLEST item, not stretched to fill
+       leftover viewport space (that was the earlier bug — 1fr rows
+       inflated cards far beyond what their text needed). align-items:
+       stretch here just makes the SHORTER card in each row match its
+       row-mate's height, so e.g. the Weather badge matches the Next
+       Prayer card instead of looking tiny beside it — a real per-row
+       balance, not the old page-filling stretch. */
+    align-items: stretch;
     column-gap: 2vw;
     row-gap: 1.6vh;
   }
   .top-bar { grid-column: 1 / -1; }
   .next-card { grid-column: 1; grid-row: 2; }
-  .weather-card { grid-column: 2; grid-row: 2; margin-bottom: 0; align-self: center; }
+  .weather-card { grid-column: 2; grid-row: 2; margin-bottom: 0; display: flex; align-items: center; justify-content: center; }
   .list-card { grid-column: 1; grid-row: 3; }
   .verse-card { grid-column: 2; grid-row: 3; }
 }
@@ -608,6 +610,13 @@ body.mode-display {
   overflow: hidden;
   position: relative;
   margin-top: auto;
+  /* Centers the ticker text vertically via flex instead of position:absolute
+     + a transform-based Y offset — the absolute version let the ticker's
+     own box collapse smaller than its text (since an absolutely positioned
+     child contributes nothing to parent height), letting the text visually
+     spill into the brand-footer card sitting right below it. */
+  display: flex;
+  align-items: center;
 }
 
 @media (orientation: landscape) and (min-width: 900px) {
@@ -619,9 +628,6 @@ body.mode-display {
    app.js, which computes --ticker-start/--ticker-end per message and
    restarts the animation on 'animationend'). */
 .ticker {
-  position: absolute;
-  top: 50%;
-  left: 0;
   white-space: nowrap;
   font-size: clamp(16px, 2.8vmin, 30px);
   font-weight: 600;

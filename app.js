@@ -24,6 +24,7 @@ const displayView = document.getElementById('displayView');
 const fileInput = document.getElementById('fileInput');
 const fileStatus = document.getElementById('fileStatus');
 const mosqueNameInput = document.getElementById('mosqueNameInput');
+const donationLabelInput = document.getElementById('donationLabelInput');
 const swishInput = document.getElementById('swishInput');
 const accountInput = document.getElementById('accountInput');
 const announcementInput = document.getElementById('announcementInput');
@@ -244,6 +245,7 @@ function buildConfigFromForm() {
         ? { lat: parseFloat(weatherCitySelect.value.split(',')[0]), lng: parseFloat(weatherCitySelect.value.split(',')[1]) }
         : null,
     mosqueName: mosqueNameInput.value.trim(),
+    donationLabel: donationLabelInput.value.trim(),
     swish: swishInput.value.trim(),
     account: accountInput.value.trim(),
     announcement: announcementInput.value.trim(),
@@ -275,6 +277,7 @@ settingsBtn.addEventListener('click', () => {
   const saved = loadConfig();
   if (saved) {
     mosqueNameInput.value = saved.mosqueName || '';
+    donationLabelInput.value = saved.donationLabel || '';
     swishInput.value = saved.swish || '';
     accountInput.value = saved.account || '';
     announcementInput.value = saved.announcement || '';
@@ -372,8 +375,12 @@ function startDisplay(config) {
   const tickerParts = [];
   if (config.announcement) tickerParts.push(config.announcement);
   if (config.swish || config.account) {
-    const donateBits = [`💚 ${t(lang, 'support')} ${config.mosqueName || ''}`];
-    if (config.swish) donateBits.push(`Swish: ${config.swish}`);
+    // The "Support X" wording is only shown if the admin typed their own
+    // custom message — a home user displaying their own prayer times has
+    // no reason to see "Support [mosque name]" phrasing, so nothing is
+    // assumed/auto-filled here (unlike mosqueName elsewhere).
+    const donateBits = config.donationLabel ? [`💚 ${config.donationLabel}`] : [];
+    if (config.swish) donateBits.push(`${donateBits.length ? '' : '💚 '}Swish: ${config.swish}`);
     if (config.account) donateBits.push(`🏦 ${t(lang, 'bankAccount')}: ${config.account}`);
     tickerParts.push(donateBits.join(' — '));
   }
@@ -467,7 +474,7 @@ function startTicker(text) {
       const elapsed = now - loopStartTime;
       const progress = (elapsed % durationMs) / durationMs;
       const x = startX - progress * distance;
-      tickerEl.style.transform = `translate(${x}px, -50%)`;
+      tickerEl.style.transform = `translateX(${x}px)`;
       rafId = requestAnimationFrame(step);
     }
     rafId = requestAnimationFrame(step);
