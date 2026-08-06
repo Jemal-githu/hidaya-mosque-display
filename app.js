@@ -380,8 +380,8 @@ function startDisplay(config) {
     // no reason to see "Support [mosque name]" phrasing, so nothing is
     // assumed/auto-filled here (unlike mosqueName elsewhere).
     const donateBits = config.donationLabel ? [`💚 ${config.donationLabel}`] : [];
-    if (config.swish) donateBits.push(`${donateBits.length ? '' : '💚 '}Swish: ${config.swish}`);
-    if (config.account) donateBits.push(`🏦 ${t(lang, 'bankAccount')}: ${config.account}`);
+    if (config.swish) donateBits.push(config.swish);
+    if (config.account) donateBits.push(config.account);
     tickerParts.push(donateBits.join(' — '));
   }
   const GAP = ' '.repeat(50);
