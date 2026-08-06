@@ -604,12 +604,12 @@ body.mode-display {
   max-width: 900px;
   background: var(--card-bg-strong);
   border: 1px solid var(--card-border);
-  border-radius: 16px 16px 0 0;
-  border-bottom: none;
+  border-radius: 16px;
   padding: 1.8vh 0;
   overflow: hidden;
   position: relative;
   margin-top: auto;
+  margin-bottom: 0.8vh;
   /* Centers the ticker text vertically via flex instead of position:absolute
      + a transform-based Y offset — the absolute version let the ticker's
      own box collapse smaller than its text (since an absolutely positioned
