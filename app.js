@@ -677,6 +677,81 @@ async function decodeConfigFromLink(str) {
   return JSON.parse(json);
 }
 
+function minutesToTimeStr(m) {
+  m = ((m % 1440) + 1440) % 1440;
+  const h = Math.floor(m / 60).toString().padStart(2, '0');
+  const mi = (m % 60).toString().padStart(2, '0');
+  return `${h}:${mi}`;
+}
+
+// Mirrors _shareTvDisplayLink in scan_timetable_screen.dart byte-for-byte —
+// see that function's comment for the format. Always gzip-compressed
+// (unlike decodeConfigFromLink, there's no uncompressed fallback flag here).
+async function decodeCompactTimetableLink(str) {
+  let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  const raw = await gunzipBytes(base64ToBytes(b64));
+
+  let pos = 1; // byte 0 is a format version, not currently checked
+  const nameLen = raw[pos] | (raw[pos + 1] << 8);
+  pos += 2;
+  const mosqueName = new TextDecoder().decode(raw.slice(pos, pos + nameLen));
+  pos += nameLen;
+
+  const bitmap = raw.slice(pos, pos + 47);
+  pos += 47;
+  const slots = [];
+  for (let s = 0; s < 372; s++) {
+    if (bitmap[s >> 3] & (1 << (s & 7))) slots.push(s);
+  }
+
+  const prayers = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  const perSlotTimes = {};
+  slots.forEach((s) => { perSlotTimes[s] = {}; });
+
+  for (const prayer of prayers) {
+    let prev = null;
+    for (const s of slots) {
+      let minutes;
+      if (prev === null) {
+        minutes = raw[pos] | (raw[pos + 1] << 8);
+        pos += 2;
+      } else {
+        const b = raw[pos];
+        pos += 1;
+        if (b === 0x80) {
+          minutes = raw[pos] | (raw[pos + 1] << 8);
+          pos += 2;
+        } else {
+          minutes = prev + (b > 127 ? b - 256 : b);
+        }
+      }
+      perSlotTimes[s][prayer] = minutesToTimeStr(minutes);
+      prev = minutes;
+    }
+  }
+
+  const months = {};
+  for (const s of slots) {
+    const month = Math.floor(s / 31) + 1;
+    const day = (s % 31) + 1;
+    months[month] = months[month] || {};
+    months[month][day] = perSlotTimes[s];
+  }
+
+  const timetable = { type: 'fullYear', mosque: mosqueName, version: 1, months };
+  const existing = loadConfig() || {};
+  return {
+    ...existing,
+    mode: 'file',
+    timetable,
+    mosqueName: mosqueName || existing.mosqueName || '',
+    calcMethod: existing.calcMethod || 'mwl',
+    language: existing.language || 'en',
+    theme: existing.theme || 'teal',
+  };
+}
+
 // Tries several free shorteners in sequence — not every one of these
 // allows cross-origin calls from browser JS (many are built for
 // curl/server-side use and silently reject or block fetch() with no
@@ -888,6 +963,25 @@ function tryLoadSharedFile() {
   if (urlConfig) {
     try {
       const config = await decodeConfigFromLink(urlConfig);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      startDisplay(config);
+      return;
+    } catch (e) {
+      // Corrupted/truncated link — fall through to normal boot instead of
+      // leaving the screen stuck on an error.
+    }
+  }
+
+  // Compact binary link from the phone app's "Share TV Display Link" (see
+  // mosque_timetable_import / scan_timetable_screen.dart's
+  // _shareTvDisplayLink) — a full year of "HH:MM" JSON is too big for any
+  // link, so the phone app sends this instead: a bitmap of which days have
+  // data plus delta-encoded minute values. Must stay byte-for-byte in sync
+  // with the Dart encoder.
+  const compactTimetable = new URLSearchParams(location.search).get('t');
+  if (compactTimetable) {
+    try {
+      const config = await decodeCompactTimetableLink(compactTimetable);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       startDisplay(config);
       return;
