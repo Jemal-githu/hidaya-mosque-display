@@ -17,8 +17,11 @@ window.hidayaFetchAds = async function hidayaFetchAds(region) {
     const results = [];
     snapshot.forEach((docSnap) => {
       const ad = docSnap.data();
-      const adRegion = (ad.region || '').trim().toLowerCase();
-      if (adRegion !== normalizedRegion && adRegion !== 'all') return;
+      // Businesses can list several cities separated by commas (e.g.
+      // "Gothenburg, Mölndal, Partille") to reach nearby areas too — match
+      // if the display's own city appears anywhere in that list.
+      const adRegions = (ad.region || '').split(',').map((r) => r.trim().toLowerCase());
+      if (!adRegions.includes(normalizedRegion) && !adRegions.includes('all')) return;
       const start = ad.startDate && ad.startDate.toDate ? ad.startDate.toDate() : null;
       const end = ad.endDate && ad.endDate.toDate ? ad.endDate.toDate() : null;
       if (start && now < start) return;
