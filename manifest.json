@@ -15,7 +15,7 @@
     "enctype": "multipart/form-data",
     "params": {
       "files": [
-        { "name": "hidayafile", "accept": [".hidaya", "application/json", "application/octet-stream"] }
+        { "name": "hidayafile", "accept": [".hidaya", ".bin", ".json", "application/json", "application/octet-stream"] }
       ]
     }
   }
