@@ -50,7 +50,7 @@ window.hidayaFetchAds = async function hidayaFetchAds(region, displayLat, displa
       }
       if (!matched) return;
 
-      results.push(`📣 ${ad.businessName}: ${ad.offerText}`);
+      results.push(`${ad.businessName}: ${ad.offerText}`);
     });
     return results;
   } catch (e) {
