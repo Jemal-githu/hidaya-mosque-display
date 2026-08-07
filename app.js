@@ -871,6 +871,13 @@ function tryLoadSharedFile() {
 }
 
 (async function boot() {
+  // A link opened with ?setup=1 (used by the phone app's "Home / TV
+  // Display" screen) always lands on the setup form, even if this
+  // browser already has a saved display running from earlier testing —
+  // otherwise there'd be no obvious way back to the "Download Offline
+  // Version" button short of knowing to click the gear icon.
+  if (new URLSearchParams(location.search).get('setup') === '1') return;
+
   if (tryLoadSharedFile()) return;
 
   // A config baked into the URL (see "Generate Link for TV") takes
