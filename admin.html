@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hidaya AI — Ad Admin</title>
+<link rel="stylesheet" href="style.css?v=38">
+<meta name="theme-color" content="#00494f">
+<style>
+  .adv-wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 60px; }
+  .adv-wrap h1 { font-size: 22px; margin-bottom: 6px; }
+  .ad-card { background: var(--card-bg, rgba(255,255,255,0.06)); border: 1px solid var(--border, rgba(255,255,255,0.15));
+             border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .ad-card h3 { margin: 0 0 4px; font-size: 16px; }
+  .ad-card p { margin: 2px 0; font-size: 13px; opacity: 0.85; }
+  .ad-badge { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+  .ad-badge.pending { background: rgba(250, 204, 21, 0.2); color: #facc15; }
+  .ad-badge.approved { background: rgba(52, 211, 153, 0.2); color: #34d399; }
+  .ad-badge.rejected { background: rgba(252, 165, 165, 0.2); color: #fca5a5; }
+  .ad-actions { margin-top: 10px; display: flex; gap: 8px; }
+  .ad-actions button { flex: 1; padding: 8px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+  .btn-approve { background: #34d399; color: #00332a; }
+  .btn-reject { background: #fca5a5; color: #4a0000; }
+  .btn-delete { background: rgba(255,255,255,0.15); color: inherit; }
+</style>
+</head>
+<body class="setup-view" style="position: static; display: block; height: auto;">
+
+<div class="adv-wrap">
+  <h1>🛠 Hidaya AI — Ad Admin</h1>
+
+  <div id="loginBox">
+    <div class="setup-step">
+      <label class="field-label">Email</label>
+      <input type="email" id="loginEmail" autocomplete="username">
+      <label class="field-label">Password</label>
+      <input type="password" id="loginPassword" autocomplete="current-password">
+      <button id="loginBtn" class="start-btn" style="margin-top: 14px;">Sign In</button>
+      <p id="loginStatus" class="file-status"></p>
+    </div>
+  </div>
+
+  <div id="adminBox" class="hidden">
+    <p class="setup-sub">Signed in. Approve or reject submissions below — approved ads go live on matching displays immediately.</p>
+    <div id="adsList"></div>
+  </div>
+</div>
+
+<script type="module" src="admin.js?v=1"></script>
+</body>
+</html>

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=38">
+<link rel="stylesheet" href="style.css?v=39">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#00494f">
 </head>
@@ -80,6 +80,13 @@
     <div class="setup-step">
       <div class="step-header"><span class="step-num">4</span><span class="step-title">Announcement (optional)</span></div>
       <input type="text" id="announcementInput" placeholder="e.g. Jumu'ah khutbah starts 13:15 this Friday">
+    </div>
+
+    <div class="setup-step">
+      <div class="step-header"><span class="step-icon">📣</span><span class="step-title">Local business ads (optional)</span></div>
+      <p class="field-hint">Show approved local halal businesses in the scrolling ticker alongside your own announcements. Businesses submit their own ads separately at <a href="advertise.html" target="_blank" style="color: inherit;">advertise.html</a> and get reviewed before going live — this display just needs to opt in and share its area.</p>
+      <label class="field-label"><input type="checkbox" id="showAdsInput"> Show local business ads</label>
+      <input type="text" id="adsRegionInput" placeholder="City/area, e.g. Timrå (must match what businesses enter)">
     </div>
 
     <div class="setup-step">
@@ -193,13 +200,14 @@
   </div>
 </div>
 
-<script src="hijri.js?v=38"></script>
-<script src="verses.js?v=38"></script>
-<script src="prayertimes.js?v=38"></script>
-<script src="translations.js?v=38"></script>
-<script src="themes.js?v=38"></script>
-<script src="cities.js?v=38"></script>
-<script src="app.js?v=38"></script>
+<script src="hijri.js?v=39"></script>
+<script src="verses.js?v=39"></script>
+<script src="prayertimes.js?v=39"></script>
+<script src="translations.js?v=39"></script>
+<script src="themes.js?v=39"></script>
+<script src="cities.js?v=39"></script>
+<script type="module" src="ads.js?v=1"></script>
+<script src="app.js?v=39"></script>
 <script>
   // Registers the share-target service worker so this page can appear in
   // Android's "Open with" / "Share" sheet for .hidaya files (e.g. shared

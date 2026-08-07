@@ -28,6 +28,8 @@ const donationLabelInput = document.getElementById('donationLabelInput');
 const swishInput = document.getElementById('swishInput');
 const accountInput = document.getElementById('accountInput');
 const announcementInput = document.getElementById('announcementInput');
+const showAdsInput = document.getElementById('showAdsInput');
+const adsRegionInput = document.getElementById('adsRegionInput');
 const startBtn = document.getElementById('startBtn');
 const setupError = document.getElementById('setupError');
 const settingsBtn = document.getElementById('settingsBtn');
@@ -250,6 +252,8 @@ function buildConfigFromForm() {
     account: accountInput.value.trim(),
     announcement: announcementInput.value.trim(),
     logo: logoDataUrl,
+    showAds: showAdsInput.checked,
+    adsRegion: adsRegionInput.value.trim(),
   };
 }
 
@@ -281,6 +285,8 @@ settingsBtn.addEventListener('click', () => {
     swishInput.value = saved.swish || '';
     accountInput.value = saved.account || '';
     announcementInput.value = saved.announcement || '';
+    showAdsInput.checked = !!saved.showAds;
+    adsRegionInput.value = saved.adsRegion || '';
     logoDataUrl = saved.logo || null;
     showLogoPreview(logoDataUrl);
     calcMethodSelect.value = saved.calcMethod || 'mwl';
@@ -322,16 +328,19 @@ let clockTimer = null;
 let verseTimer = null;
 let tickerCancel = null; // cancels the ticker's requestAnimationFrame loop
 let weatherTimer = null;
+let adsRefreshTimer = null;
 
 function stopClocks() {
   if (clockTimer) clearInterval(clockTimer);
   if (verseTimer) clearInterval(verseTimer);
   if (tickerCancel) tickerCancel();
   if (weatherTimer) clearInterval(weatherTimer);
+  if (adsRefreshTimer) clearInterval(adsRefreshTimer);
   clockTimer = null;
   verseTimer = null;
   tickerCancel = null;
   weatherTimer = null;
+  adsRefreshTimer = null;
 }
 
 function timesForDate(config, date) {
@@ -374,8 +383,8 @@ function startDisplay(config) {
   // unbroken scroll rather than stopping/restarting between sentences.
   // The Hidaya AI branding is NOT part of this — it has its own small
   // static card below instead (see the brand-footer element).
-  const tickerParts = [];
-  if (config.announcement) tickerParts.push(config.announcement);
+  const baseTickerParts = [];
+  if (config.announcement) baseTickerParts.push(config.announcement);
   if (config.swish || config.account) {
     // The "Support X" wording is only shown if the admin typed their own
     // custom message — a home user displaying their own prayer times has
@@ -384,10 +393,30 @@ function startDisplay(config) {
     const donateBits = config.donationLabel ? [`💚 ${config.donationLabel}`] : [];
     if (config.swish) donateBits.push(config.swish);
     if (config.account) donateBits.push(config.account);
-    tickerParts.push(donateBits.join(' — '));
+    baseTickerParts.push(donateBits.join(' — '));
   }
-  const GAP = ' '.repeat(50);
-  startTicker(tickerParts.length ? tickerParts.join(GAP) : `🕌 ${config.mosqueName || 'Hidaya AI'}`);
+  const GAP = ' '.repeat(50);
+  const renderTicker = (adsParts) => {
+    const parts = [...baseTickerParts, ...(adsParts || [])];
+    startTicker(parts.length ? parts.join(GAP) : `🕌 ${config.mosqueName || 'Hidaya AI'}`);
+  };
+  renderTicker([]);
+
+  // Local-business ads (see the "Local business ads" setup step) are
+  // opt-in and matched by a simple region text match — fetched after the
+  // mosque's own ticker content is already showing so a slow/offline
+  // network never blocks the display, and refreshed periodically since
+  // a display stays running for weeks without a page reload.
+  if (adsRefreshTimer) clearInterval(adsRefreshTimer);
+  if (config.showAds) {
+    const loadAds = async () => {
+      if (typeof window.hidayaFetchAds !== 'function') return;
+      const ads = await window.hidayaFetchAds(config.adsRegion || config.mosqueName || '');
+      renderTicker(ads);
+    };
+    loadAds();
+    adsRefreshTimer = setInterval(loadAds, 10 * 60 * 1000); // every 10 minutes
+  }
 
   document.getElementById('brandPrefixOut').textContent = t(lang, 'poweredBy');
 
