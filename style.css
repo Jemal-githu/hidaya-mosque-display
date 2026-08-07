@@ -239,6 +239,23 @@ body.mode-display {
 .file-status.ok { color: var(--accent); }
 .file-status.err { color: #fca5a5; }
 
+/* A loaded timetable needs to be unmistakable regardless of how it got
+   there (file picker, WhatsApp share, or a link) — the native file input's
+   own "No file chosen" label never updates for those other paths, so this
+   badge is the one place users can actually trust. */
+.file-status.loaded-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #34d399;
+  font-weight: 600;
+}
+
 .logo-preview-wrap {
   display: flex;
   align-items: center;

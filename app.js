@@ -207,8 +207,8 @@ fileInput.addEventListener('change', () => {
       parsedTimetable = json;
       sourceMode = 'file';
       const monthCount = Object.keys(json.months).length;
-      fileStatus.textContent = `Loaded ${monthCount} month(s) of prayer times.`;
-      fileStatus.className = 'file-status ok';
+      fileStatus.textContent = `✓ Timetable loaded — ${monthCount} month(s) of prayer times`;
+      fileStatus.className = 'file-status loaded-badge';
       if (json.mosque && !mosqueNameInput.value.trim()) {
         mosqueNameInput.value = json.mosque;
       }
@@ -298,8 +298,10 @@ settingsBtn.addEventListener('click', () => {
     } else if (saved.timetable) {
       parsedTimetable = saved.timetable;
       sourceMode = 'file';
-      fileStatus.textContent = 'Using previously loaded timetable — choose a new file to replace it.';
-      fileStatus.className = 'file-status ok';
+      const monthCount = saved.timetable.months ? Object.keys(saved.timetable.months).length : 0;
+      const mosqueLabel = saved.timetable.mosque ? ` — ${saved.timetable.mosque}` : '';
+      fileStatus.textContent = `✓ Timetable loaded${mosqueLabel} (${monthCount} month(s)) — choose a new file to replace it`;
+      fileStatus.className = 'file-status loaded-badge';
     }
     updateStartButton();
   }
