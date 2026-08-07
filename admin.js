@@ -46,7 +46,7 @@ function renderAds(snapshot) {
       <span class="ad-badge ${ad.status}">${ad.status.toUpperCase()}</span>
       <h3>${ad.businessName || '(no name)'}</h3>
       <p>${ad.offerText || ''}</p>
-      <p>📍 ${ad.region || '—'} &nbsp;|&nbsp; 🗂 ${ad.category || '—'}</p>
+      <p>📍 ${typeof ad.lat === 'number' ? `GPS + ${ad.radiusKm} km radius` : (ad.region || '—')} &nbsp;|&nbsp; 🗂 ${ad.category || '—'}</p>
       <p>📅 ${fmtDate(ad.startDate)} → ${fmtDate(ad.endDate)}</p>
       <p>✉️ ${ad.contact || '—'}</p>
       <div class="ad-actions"></div>

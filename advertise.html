@@ -37,8 +37,20 @@
       <label class="field-label">Offer / message (shown on screen)</label>
       <input type="text" id="offerText" placeholder="e.g. 15% off this week — mention Hidaya AI" maxlength="120" required>
 
-      <label class="field-label">City / area</label>
-      <p class="field-hint">Enter one city, or several separated by commas if you want to reach nearby areas too (e.g. "Gothenburg, Mölndal, Partille"). Each display only shows ads whose list includes its own city — spelling must match what the display uses (case-insensitive). Ask the mosque or check the display if unsure.</p>
+      <label class="field-label">Reach by distance (recommended)</label>
+      <p class="field-hint">Tap below to use your phone's GPS, then choose how far your ad should reach. This is the most accurate way to target nearby displays.</p>
+      <button type="button" id="detectLocationBtn" class="secondary-btn">📍 Use My Current Location</button>
+      <div id="locationStatus" class="file-status"></div>
+      <select id="radiusSelect" class="setup-select">
+        <option value="5">Within 5 km</option>
+        <option value="10" selected>Within 10 km</option>
+        <option value="25">Within 25 km</option>
+        <option value="50">Within 50 km</option>
+        <option value="100">Within 100 km</option>
+      </select>
+
+      <label class="field-label">City / area (fallback, always fill in)</label>
+      <p class="field-hint">Used only for displays that don't have GPS set up. Enter one city, or several separated by commas (e.g. "Gothenburg, Mölndal, Partille") — spelling must match what the display uses (case-insensitive).</p>
       <input type="text" id="region" placeholder="e.g. Gothenburg, Mölndal, Partille" required>
 
       <label class="field-label">Show from</label>
@@ -56,6 +68,6 @@
   </form>
 </div>
 
-<script type="module" src="advertise.js?v=1"></script>
+<script type="module" src="advertise.js?v=2"></script>
 </body>
 </html>

@@ -30,6 +30,32 @@ const accountInput = document.getElementById('accountInput');
 const announcementInput = document.getElementById('announcementInput');
 const showAdsInput = document.getElementById('showAdsInput');
 const adsRegionInput = document.getElementById('adsRegionInput');
+const detectAdsLocationBtn = document.getElementById('detectAdsLocationBtn');
+const adsLocationStatus = document.getElementById('adsLocationStatus');
+let adsLat = null;
+let adsLng = null;
+
+detectAdsLocationBtn.addEventListener('click', () => {
+  if (!navigator.geolocation) {
+    adsLocationStatus.textContent = 'This browser can\'t detect location — use the City/area field instead.';
+    adsLocationStatus.className = 'file-status err';
+    return;
+  }
+  adsLocationStatus.textContent = 'Detecting…';
+  adsLocationStatus.className = 'file-status';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      adsLat = pos.coords.latitude;
+      adsLng = pos.coords.longitude;
+      adsLocationStatus.textContent = '✓ Location set — ads with a matching radius will now show here.';
+      adsLocationStatus.className = 'file-status ok';
+    },
+    () => {
+      adsLocationStatus.textContent = 'Could not get location — permission denied or unavailable. The City/area field will be used instead.';
+      adsLocationStatus.className = 'file-status err';
+    },
+  );
+});
 const startBtn = document.getElementById('startBtn');
 const setupError = document.getElementById('setupError');
 const settingsBtn = document.getElementById('settingsBtn');
@@ -254,6 +280,8 @@ function buildConfigFromForm() {
     logo: logoDataUrl,
     showAds: showAdsInput.checked,
     adsRegion: adsRegionInput.value.trim(),
+    adsLat,
+    adsLng,
   };
 }
 
@@ -287,6 +315,14 @@ settingsBtn.addEventListener('click', () => {
     announcementInput.value = saved.announcement || '';
     showAdsInput.checked = !!saved.showAds;
     adsRegionInput.value = saved.adsRegion || '';
+    adsLat = typeof saved.adsLat === 'number' ? saved.adsLat : null;
+    adsLng = typeof saved.adsLng === 'number' ? saved.adsLng : null;
+    if (adsLat !== null) {
+      adsLocationStatus.textContent = '✓ Location previously set — tap the button again to refresh it.';
+      adsLocationStatus.className = 'file-status ok';
+    } else {
+      adsLocationStatus.textContent = '';
+    }
     logoDataUrl = saved.logo || null;
     showLogoPreview(logoDataUrl);
     calcMethodSelect.value = saved.calcMethod || 'mwl';
@@ -411,7 +447,11 @@ function startDisplay(config) {
   if (config.showAds) {
     const loadAds = async () => {
       if (typeof window.hidayaFetchAds !== 'function') return;
-      const ads = await window.hidayaFetchAds(config.adsRegion || config.mosqueName || '');
+      const ads = await window.hidayaFetchAds(
+        config.adsRegion || config.mosqueName || '',
+        config.adsLat,
+        config.adsLng,
+      );
       renderTicker(ads);
     };
     loadAds();
