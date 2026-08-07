@@ -4,10 +4,13 @@ service cloud.firestore {
     match /ads/{adId} {
       // Public: anyone can read an ad only if it's approved and currently
       // within its date range — pending/rejected ads are never publicly
-      // visible, and expired/future ads don't leak either.
-      allow read: if resource.data.status == 'approved'
-                   && request.time >= resource.data.startDate
-                   && request.time <= resource.data.endDate;
+      // visible, and expired/future ads don't leak either. A signed-in
+      // admin (you) can read everything, including pending ones, so the
+      // approval page actually has something to review.
+      allow read: if (resource.data.status == 'approved'
+                       && request.time >= resource.data.startDate
+                       && request.time <= resource.data.endDate)
+                   || request.auth != null;
 
       // Public: anyone can submit a new ad, but only as 'pending' — they
       // cannot self-approve.
