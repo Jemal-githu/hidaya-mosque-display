@@ -652,8 +652,8 @@ body.mode-display {
   color: var(--text);
 }
 .ticker-icon {
-  height: clamp(32px, 6vmin, 64px);
-  width: clamp(32px, 6vmin, 64px);
+  height: clamp(48px, 10vmin, 96px);
+  width: clamp(48px, 10vmin, 96px);
   vertical-align: middle;
   margin-right: 0.35em;
   margin-top: -0.3em;
