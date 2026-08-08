@@ -651,6 +651,10 @@ body.mode-display {
   font-weight: 600;
   color: var(--text);
 }
+.ticker-brand {
+  font-family: 'Agressive', 'Anton', 'Poppins', 'Segoe UI', sans-serif;
+  letter-spacing: 0;
+}
 .ticker-icon {
   height: clamp(48px, 10vmin, 96px);
   width: clamp(48px, 10vmin, 96px);
