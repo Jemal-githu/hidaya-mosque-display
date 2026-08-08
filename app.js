@@ -27,7 +27,7 @@ const mosqueNameInput = document.getElementById('mosqueNameInput');
 const donationLabelInput = document.getElementById('donationLabelInput');
 const swishInput = document.getElementById('swishInput');
 const accountInput = document.getElementById('accountInput');
-const announcementInput = document.getElementById('announcementInput');
+const announcementSlots = [...document.querySelectorAll('.announcementSlot')];
 const showAdsInput = document.getElementById('showAdsInput');
 const adsRegionInput = document.getElementById('adsRegionInput');
 const detectAdsLocationBtn = document.getElementById('detectAdsLocationBtn');
@@ -276,7 +276,7 @@ function buildConfigFromForm() {
     donationLabel: donationLabelInput.value.trim(),
     swish: swishInput.value.trim(),
     account: accountInput.value.trim(),
-    announcement: announcementInput.value.trim(),
+    announcements: announcementSlots.map((el) => el.value.trim()).filter(Boolean),
     logo: logoDataUrl,
     showAds: showAdsInput.checked,
     adsRegion: adsRegionInput.value.trim(),
@@ -312,7 +312,9 @@ settingsBtn.addEventListener('click', () => {
     donationLabelInput.value = saved.donationLabel || '';
     swishInput.value = saved.swish || '';
     accountInput.value = saved.account || '';
-    announcementInput.value = saved.announcement || '';
+    const savedAnnouncements = saved.announcements
+      || (saved.announcement ? [saved.announcement] : []); // old single-field configs
+    announcementSlots.forEach((el, i) => { el.value = savedAnnouncements[i] || ''; });
     showAdsInput.checked = !!saved.showAds;
     adsRegionInput.value = saved.adsRegion || '';
     adsLat = typeof saved.adsLat === 'number' ? saved.adsLat : null;
@@ -420,7 +422,11 @@ function startDisplay(config) {
   // The Hidaya AI branding is NOT part of this — it has its own small
   // static card below instead (see the brand-footer element).
   const baseTickerParts = [];
-  if (config.announcement) baseTickerParts.push(config.announcement);
+  if (config.announcements && config.announcements.length) {
+    baseTickerParts.push(...config.announcements);
+  } else if (config.announcement) {
+    baseTickerParts.push(config.announcement); // old single-field configs
+  }
   if (config.swish || config.account) {
     // The "Support X" wording is only shown if the admin typed their own
     // custom message — a home user displaying their own prayer times has

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=41">
+<link rel="stylesheet" href="style.css?v=42">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#00494f">
 </head>
@@ -78,8 +78,18 @@
     </div>
 
     <div class="setup-step">
-      <div class="step-header"><span class="step-num">4</span><span class="step-title">Announcement (optional)</span></div>
-      <input type="text" id="announcementInput" placeholder="e.g. Jumu'ah khutbah starts 13:15 this Friday">
+      <div class="step-header"><span class="step-num">4</span><span class="step-title">Announcements (optional)</span></div>
+      <p class="field-hint">Up to 10 separate announcements — each one scrolls in the ticker with a wide gap before the next, leave any of them blank to skip.</p>
+      <input type="text" class="announcementSlot" placeholder="Announcement 1 — e.g. Jumu'ah khutbah starts 13:15 this Friday">
+      <input type="text" class="announcementSlot" placeholder="Announcement 2">
+      <input type="text" class="announcementSlot" placeholder="Announcement 3">
+      <input type="text" class="announcementSlot" placeholder="Announcement 4">
+      <input type="text" class="announcementSlot" placeholder="Announcement 5">
+      <input type="text" class="announcementSlot" placeholder="Announcement 6">
+      <input type="text" class="announcementSlot" placeholder="Announcement 7">
+      <input type="text" class="announcementSlot" placeholder="Announcement 8">
+      <input type="text" class="announcementSlot" placeholder="Announcement 9">
+      <input type="text" class="announcementSlot" placeholder="Announcement 10">
     </div>
 
     <div class="setup-step">
@@ -89,6 +99,9 @@
       <button type="button" id="detectAdsLocationBtn" class="secondary-btn">📍 Detect This Display's Location</button>
       <div id="adsLocationStatus" class="file-status"></div>
       <input type="text" id="adsRegionInput" placeholder="City/area (fallback), e.g. Timrå (must match what businesses enter)">
+      <a href="advertise.html" target="_blank" class="secondary-btn" style="display: block; text-align: center; text-decoration: none; margin-top: 10px;">
+        <img src="megaphone-icon.png" alt="" style="width: 16px; height: 16px; vertical-align: -3px; margin-right: 6px;">Advertise Your Business Here
+      </a>
     </div>
 
     <div class="setup-step">
@@ -202,14 +215,14 @@
   </div>
 </div>
 
-<script src="hijri.js?v=41"></script>
-<script src="verses.js?v=41"></script>
-<script src="prayertimes.js?v=41"></script>
-<script src="translations.js?v=41"></script>
-<script src="themes.js?v=41"></script>
-<script src="cities.js?v=41"></script>
+<script src="hijri.js?v=42"></script>
+<script src="verses.js?v=42"></script>
+<script src="prayertimes.js?v=42"></script>
+<script src="translations.js?v=42"></script>
+<script src="themes.js?v=42"></script>
+<script src="cities.js?v=42"></script>
 <script type="module" src="ads.js?v=3"></script>
-<script src="app.js?v=41"></script>
+<script src="app.js?v=42"></script>
 <script>
   // Registers the share-target service worker so this page can appear in
   // Android's "Open with" / "Share" sheet for .hidaya files (e.g. shared
