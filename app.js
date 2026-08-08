@@ -469,6 +469,13 @@ function startDisplay(config) {
   if (adsRefreshTimer) clearInterval(adsRefreshTimer);
   if (config.showAds) {
     const loadAds = async () => {
+      // ads.js is a deferred module script, so on a fresh page load it can
+      // still be mid-load the instant startDisplay runs — wait briefly
+      // instead of silently giving up (which used to mean no ads until
+      // the 10-minute refresh timer, on every single first load).
+      for (let i = 0; i < 20 && typeof window.hidayaFetchAds !== 'function'; i++) {
+        await new Promise((r) => setTimeout(r, 250));
+      }
       if (typeof window.hidayaFetchAds !== 'function') return;
       const ads = await window.hidayaFetchAds(
         config.adsRegion || config.mosqueName || '',
