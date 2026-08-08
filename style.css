@@ -654,6 +654,7 @@ body.mode-display {
 .ticker-brand {
   font-family: 'Agressive', 'Anton', 'Poppins', 'Segoe UI', sans-serif;
   letter-spacing: 0;
+  font-size: 0.7em;
 }
 /* Matches the official multi-color HIDAYA AI wordmark exactly (blue/red/purple). */
 .tb-blue { color: #14A8E2; }
