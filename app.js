@@ -454,10 +454,18 @@ function startDisplay(config) {
       ...baseTickerParts.map(escapeHtml),
       ...(adsParts || []).map((txt) => `<img src="megaphone-icon.png" class="ticker-icon" alt="">${escapeHtml(txt)}`),
     ];
+    // Idle default (no ads, announcements, or donation info set) — instead
+    // of a bare mosque name sitting still, promote the Hidaya AI app itself
+    // so the screen is never wasted space.
+    const idleParts = [
+      `🕌 ${escapeHtml(config.mosqueName || 'Hidaya AI')}`,
+      '📲 Download HIDAYA AI — Prayer Times, Quran, Qibla & more, free on Google Play',
+    ];
     // A trailing GAP too, not just between items — otherwise the last
     // message runs straight into the first one again when the scroll
     // loops back to the start, with no visible gap at the seam.
-    startTicker(htmlParts.length ? htmlParts.join(GAP) + GAP : `🕌 ${escapeHtml(config.mosqueName || 'Hidaya AI')}`);
+    const finalParts = htmlParts.length ? htmlParts : idleParts;
+    startTicker(finalParts.join(GAP) + GAP);
   };
   renderTicker([]);
 
