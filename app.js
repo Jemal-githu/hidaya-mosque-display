@@ -437,10 +437,13 @@ function startDisplay(config) {
     if (config.account) donateBits.push(config.account);
     baseTickerParts.push(donateBits.join(' — '));
   }
-  const GAP = ' '.repeat(50);
+  const GAP = ' '.repeat(50); // non-breaking spaces — plain spaces collapse to one under CSS's default whitespace handling
   const renderTicker = (adsParts) => {
     const parts = [...baseTickerParts, ...(adsParts || [])];
-    startTicker(parts.length ? parts.join(GAP) : `🕌 ${config.mosqueName || 'Hidaya AI'}`);
+    // A trailing GAP too, not just between items — otherwise the last
+    // message runs straight into the first one again when the scroll
+    // loops back to the start, with no visible gap at the seam.
+    startTicker(parts.length ? parts.join(GAP) + GAP : `🕌 ${config.mosqueName || 'Hidaya AI'}`);
   };
   renderTicker([]);
 
