@@ -652,10 +652,10 @@ body.mode-display {
   color: var(--text);
 }
 .ticker-icon {
-  height: 0.85em;
-  width: 0.85em;
-  vertical-align: -0.1em;
-  margin-right: 0.3em;
+  height: 1.6em;
+  width: 1.6em;
+  vertical-align: -0.45em;
+  margin-right: 0.35em;
   object-fit: contain;
 }
 
