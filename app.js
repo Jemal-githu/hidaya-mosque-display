@@ -3,6 +3,12 @@
 // localStorage, since a mosque TV is expected to run one browser tab
 // continuously rather than needing multi-device sync.
 
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 const STORAGE_KEY = 'hidaya_display_config_v1';
 const PRAYER_ORDER = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const COUNTDOWN_PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
@@ -439,11 +445,19 @@ function startDisplay(config) {
   }
   const GAP = ' '.repeat(50); // non-breaking spaces — plain spaces collapse to one under CSS's default whitespace handling
   const renderTicker = (adsParts) => {
-    const parts = [...baseTickerParts, ...(adsParts || [])];
+    // Ads carry a megaphone icon, plain announcements/donation lines don't
+    // — built as escaped HTML (not textContent) so the icon can sit inline
+    // with the text. Ad text comes from public Firestore submissions, so
+    // it's escaped here rather than trusted, even though it's just going
+    // into an <img>+text pairing.
+    const htmlParts = [
+      ...baseTickerParts.map(escapeHtml),
+      ...(adsParts || []).map((txt) => `<img src="megaphone-icon.png" class="ticker-icon" alt="">${escapeHtml(txt)}`),
+    ];
     // A trailing GAP too, not just between items — otherwise the last
     // message runs straight into the first one again when the scroll
     // loops back to the start, with no visible gap at the seam.
-    startTicker(parts.length ? parts.join(GAP) + GAP : `🕌 ${config.mosqueName || 'Hidaya AI'}`);
+    startTicker(htmlParts.length ? htmlParts.join(GAP) + GAP : `🕌 ${escapeHtml(config.mosqueName || 'Hidaya AI')}`);
   };
   renderTicker([]);
 
@@ -537,13 +551,18 @@ function fetchWeather(loc) {
 // it as "running"), and a manual rAF loop sidesteps that entirely while
 // also being about as universally supported as anything gets across
 // embedded/TV browsers.
-function startTicker(text) {
+function startTicker(html) {
   const tickerEl = document.getElementById('tickerOut');
   const barEl = tickerEl.parentElement;
   const SPEED_PX_PER_SEC = 140;
   let rafId = null;
 
-  tickerEl.textContent = text;
+  // innerHTML (not textContent) so ad entries can include the megaphone
+  // icon inline — callers are responsible for escaping any user-supplied
+  // text before it reaches here (see renderTicker's escapeHtml calls).
+  // The icon has a fixed CSS size (.ticker-icon), so scrollWidth below is
+  // accurate immediately even before the image itself has finished loading.
+  tickerEl.innerHTML = html;
   const startX = barEl.clientWidth;
   const endX = -tickerEl.scrollWidth;
   const distance = startX - endX;

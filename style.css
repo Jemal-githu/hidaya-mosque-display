@@ -651,6 +651,13 @@ body.mode-display {
   font-weight: 600;
   color: var(--text);
 }
+.ticker-icon {
+  height: 0.85em;
+  width: 0.85em;
+  vertical-align: -0.1em;
+  margin-right: 0.3em;
+  object-fit: contain;
+}
 
 /* Small static footer card — no scrolling/animation, sits under the
    ticker as its own separate line. */
