@@ -459,7 +459,7 @@ function startDisplay(config) {
     // so the screen is never wasted space.
     const idleParts = [
       `🕌 ${escapeHtml(config.mosqueName || 'Hidaya AI')}`,
-      '📲 Download <span class="ticker-brand">HIDAYA AI</span> — Prayer Times, Quran, Qibla & more, free on Google Play',
+      '📲 Download <span class="ticker-brand"><span class="tb-blue">HID</span><span class="tb-red">AYA</span> <span class="tb-purple">AI</span></span> — Prayer Times, Quran, Qibla & more, free on Google Play',
     ];
     // A trailing GAP too, not just between items — otherwise the last
     // message runs straight into the first one again when the scroll

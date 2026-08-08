@@ -655,6 +655,10 @@ body.mode-display {
   font-family: 'Agressive', 'Anton', 'Poppins', 'Segoe UI', sans-serif;
   letter-spacing: 0;
 }
+/* Matches the official multi-color HIDAYA AI wordmark exactly (blue/red/purple). */
+.tb-blue { color: #14A8E2; }
+.tb-red { color: #E8121D; }
+.tb-purple { color: #7B2CBF; }
 .ticker-icon {
   height: clamp(48px, 10vmin, 96px);
   width: clamp(48px, 10vmin, 96px);
