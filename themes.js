@@ -40,12 +40,25 @@ const THEMES = {
     },
   },
   light: {
+    // Matches the phone app's actual "Desert Light" theme exactly
+    // (app_settings.dart _themes['light']) — golden/amber, not beige.
     label: 'Desert Light (bright rooms)',
     vars: {
-      '--bg-top': '#f5e6d3', '--bg-bottom': '#e8d4b8',
-      '--card-bg': 'rgba(93, 64, 55, 0.08)', '--card-bg-strong': 'rgba(93, 64, 55, 0.14)',
-      '--card-border': 'rgba(141, 110, 99, 0.35)', '--accent': '#6d4c41',
-      '--text': '#3e2723', '--text-muted': 'rgba(62, 39, 35, 0.72)', '--text-dim': 'rgba(62, 39, 35, 0.45)',
+      '--bg-top': '#FEF3C7', '--bg-bottom': '#FDE68A',
+      '--card-bg': 'rgba(146, 64, 14, 0.08)', '--card-bg-strong': 'rgba(146, 64, 14, 0.14)',
+      '--card-border': 'rgba(251, 191, 36, 0.5)', '--accent': '#92400E',
+      '--text': '#111827', '--text-muted': 'rgba(17, 24, 39, 0.72)', '--text-dim': 'rgba(17, 24, 39, 0.45)',
+    },
+  },
+  purple: {
+    // Matches the phone app's "Amethyst Purple" theme exactly
+    // (app_settings.dart _themes['purple']).
+    label: 'Amethyst Purple',
+    vars: {
+      '--bg-top': '#7B1FA2', '--bg-bottom': '#470E63',
+      '--card-bg': 'rgba(225, 190, 231, 0.14)', '--card-bg-strong': 'rgba(225, 190, 231, 0.22)',
+      '--card-border': 'rgba(166, 83, 194, 0.45)', '--accent': '#E1BEE7',
+      '--text': '#ffffff', '--text-muted': 'rgba(255, 255, 255, 0.75)', '--text-dim': 'rgba(255, 255, 255, 0.5)',
     },
   },
 };
