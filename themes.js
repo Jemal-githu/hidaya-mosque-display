@@ -40,14 +40,19 @@ const THEMES = {
     },
   },
   light: {
-    // Matches the phone app's actual "Desert Light" theme exactly
-    // (app_settings.dart _themes['light']) — golden/amber, not beige.
+    // The phone app's "Desert Light" page background is actually pale
+    // cream (0xFFF5F0E8) — the rich gold look in the app comes from its
+    // menu CARDS (primary/primaryEnd, 0xFDE68A/0xFBBF24), not the page
+    // itself. A display has no menu grid, so the gradient background
+    // uses that same gold pair directly to get the same golden impression,
+    // with lighter cream cards on top for contrast (mirroring how the
+    // app's cards read lighter/richer against its own pale background).
     label: 'Desert Light (bright rooms)',
     vars: {
-      '--bg-top': '#FEF3C7', '--bg-bottom': '#FDE68A',
-      '--card-bg': 'rgba(146, 64, 14, 0.08)', '--card-bg-strong': 'rgba(146, 64, 14, 0.14)',
-      '--card-border': 'rgba(251, 191, 36, 0.5)', '--accent': '#92400E',
-      '--text': '#111827', '--text-muted': 'rgba(17, 24, 39, 0.72)', '--text-dim': 'rgba(17, 24, 39, 0.45)',
+      '--bg-top': '#FDE68A', '--bg-bottom': '#FBBF24',
+      '--card-bg': 'rgba(255, 253, 245, 0.45)', '--card-bg-strong': 'rgba(255, 253, 245, 0.68)',
+      '--card-border': 'rgba(146, 64, 14, 0.3)', '--accent': '#7A3B0A',
+      '--text': '#3E2200', '--text-muted': 'rgba(62, 34, 0, 0.72)', '--text-dim': 'rgba(62, 34, 0, 0.45)',
     },
   },
   purple: {
